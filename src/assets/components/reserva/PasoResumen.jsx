@@ -19,7 +19,7 @@ const PasoResumen = ({
   };
 
   return (
-    <div className="flex flex-col z-10 gap-6 w-full text-[#fff6ea] RovelleUnoRegular">
+    <div className="flex flex-col z-10 gap-6 md:w-full w-3/4 text-[#fff6ea] RovelleUnoRegular">
       <p className="text-sm font-medium">Verifica la información:</p>
 
       <p className="text-md RovelleUnoRegular">

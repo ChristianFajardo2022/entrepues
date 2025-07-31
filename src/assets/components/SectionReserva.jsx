@@ -6,6 +6,7 @@ import PasoCantidad from "./reserva/PasoCantidad";
 import PasoContacto from "./reserva/PasoContacto";
 import PasoResumen from "./reserva/PasoResumen";
 import PasoConfirmacion from "./reserva/PasoConfirmacion";
+import Iconoprincipal from "./Iconoprincipal";
 
 const SectionReserva = ({ onClose }) => {
   const [step, setStep] = useState(1);
@@ -23,11 +24,13 @@ const SectionReserva = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex md:flex-row flex-col items-end">
+      <Iconoprincipal />
       {/* Lado izquierdo con blur */}
       <div className="md:w-[60%] w-full md:h-full h-[25%]  bg-black/30 backdrop-blur-sm">
-        <Link className="absolute  left-40 top-12 md:block hidden" to="/">
+        {/*         <Link className="absolute  left-40 top-10 md:block hidden" to="/">
           <img className="w-38 z-50" src="/entrepues.svg" alt="Logo" />
         </Link>
+ */}{" "}
       </div>
 
       {/* Lado derecho */}
@@ -120,6 +123,23 @@ const SectionReserva = ({ onClose }) => {
               )}
             </>
           )}
+        </div>
+
+        {/* Línea de progreso con dots conectados */}
+        <div className=" mb-20 w-full flex items-center justify-center z-20">
+          <div className="relative w-[4rem] flex items-center justify-between">
+            {/* Línea base */}
+            <div className="absolute top-1/2 left-0 w-full h-[2px] bg-[#fff6ea30] -translate-y-1/2"></div>
+
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full border-2 z-10 ${
+                  step >= i ? "bg-[#918e8b]" : "bg-transparent"
+                } border-[#918e8b]`}
+              ></div>
+            ))}
+          </div>
         </div>
 
         {/* Botón "Siguiente" FUERA del div bg-amber-700 */}

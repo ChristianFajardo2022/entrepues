@@ -5,6 +5,7 @@ import Carta from './assets/components/Carta';
 import { useState } from 'react';
 import Video360 from './Video360';
 import Ubicacion from './assets/components/Ubicacion';
+import CartaMobile from './assets/components/CartaMobile';
 
 function App() {
   const [count, setCount] = useState(6);
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/carta" element={<Carta />} />
+        <Route path="/cartam" element={<CartaMobile />} />
         <Route path="/ubicacion" element={<Ubicacion />} />
         <Route path="/video" element={
           <div style={{ position: "relative", width: "100vw", height: "100vh"}}>

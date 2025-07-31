@@ -2,7 +2,7 @@ import React from "react";
 
 const PasoCantidad = ({ adults, children, setAdults, setChildren }) => {
   return (
-    <div className="flex flex-col z-10 items-center w-full my-10 gap-10 text-[#fff6ea] text-sm">
+    <div className="flex flex-col z-10 items-center md:w-full my-10 gap-10 text-[#fff6ea] text-sm ">
       {/* Adultos */}
       <div className="w-full flex justify-between">
         <div>

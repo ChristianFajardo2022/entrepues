@@ -9,7 +9,7 @@ const PasoContacto = ({
   setWhatsapp,
 }) => {
   return (
-    <div className="flex flex-col z-10 w-full my-10 text-[#fff6ea] text-sm gap-8 RovelleUnoBold">
+    <div className="flex flex-col z-10 md:w-full my-10 text-[#fff6ea] text-sm gap-8 RovelleUnoBold">
       <p className="text-sm mb-1">Tus datos:</p>
 
       {/* Nombre completo */}

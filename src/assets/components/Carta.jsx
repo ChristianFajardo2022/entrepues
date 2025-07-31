@@ -6,6 +6,7 @@ import useCartStore from "../../../src/store/cartStore";
 import CartButton from "./CartButton";
 import CartModal from "./CartModal";
 import SectionReserva from "./SectionReserva"; // Asegúrate de tener este componente
+import Iconoprincipal from "./Iconoprincipal";
 
 const regionColors = {
   orinoquía: "#e89726",
@@ -67,6 +68,7 @@ const Carta = () => {
 
   return (
     <div className="relative w-full h-full text-white">
+      <Iconoprincipal />
       <CartModal isOpen={showCart} onClose={() => setShowCart(false)} />
 
       <div className="absolute top-0 left-0 w-full h-screen">
@@ -92,14 +94,14 @@ const Carta = () => {
       </div>
 
       <div className="relative z-10 bg-transparent">
-        <Link to="/">
+{/*         <Link to="/">
           <img
             className="md:w-38 w-20 absolute md:left-40 left-10 top-10"
             src="/entrepues.svg"
             alt="Logo"
           />
         </Link>
-
+ */}
         <div className="w-full mx-auto px-4 py-8">
           <div className="flex flex-col gap-4 mb-8 mt-52 md:fixed md:pl-[9rem]">
             <div className="flex items-center pb-5 justify-between w-72">
