@@ -7,20 +7,108 @@ import PasoContacto from "./reserva/PasoContacto";
 import PasoResumen from "./reserva/PasoResumen";
 import PasoConfirmacion from "./reserva/PasoConfirmacion";
 import Iconoprincipal from "./Iconoprincipal";
+import { useReservaStore } from "../../store/reservaStore";
+import useCartStore from "../../store/cartStore";
 
-const SectionReserva = ({ onClose }) => {
+export const confirmarReserva = async (
+  enviarDatos,
+  cartItems,
+  clearCart,
+  setConfirmed
+) => {
+  const res = await enviarDatos({ productos: cartItems });
+  if (res.ok) {
+    clearCart();
+    setConfirmed(true);
+
+    console.log(res);
+  } else {
+    console.error(res.error);
+  }
+};
+
+const SectionReserva = ({ menu, onClose }) => {
   const [step, setStep] = useState(1);
   const [confirmed, setConfirmed] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(null);
-  const [hour, setHour] = useState(1);
-  const [minute, setMinute] = useState(0);
+  const [hour, setHour] = useState("01");
+  const [minute, setMinute] = useState("00");
   const [amPm, setAmPm] = useState("am");
+
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+
+  /* Store de zustand */
+
+  const {
+    datos,
+    guardarDatos,
+    enviarDirecto,
+    enviarDatos,
+    limpiarStorage,
+    isSending,
+  } = useReservaStore();
+
+  const {
+    cartItems,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart,
+  } = useCartStore();
+
+  const handleConfirmarReserva = async () => {
+    await confirmarReserva(enviarDatos, cartItems, clearCart, setConfirmed);
+  };
+
+  const handleGuardarReserva = () => {
+    const formatDate = () => {
+      const options = { weekday: "long", day: "numeric", month: "long" };
+      return selectedDate.toLocaleDateString("es-CO", options);
+    };
+    const payload = {
+      fecha: formatDate(),
+      hora: `${hour}:${minute} ${amPm}`,
+      adultos: adults,
+      niños: children,
+      nombre: name,
+      email,
+      whatsapp,
+    };
+
+    guardarDatos(payload);
+    setStep(5);
+  };
+
+  const handleEnvio = async () => {
+    const formatDate = () => {
+      const options = { weekday: "long", day: "numeric", month: "long" };
+      return selectedDate.toLocaleDateString("es-CO", options);
+    };
+    const payload = {
+      fecha: formatDate(),
+      hora: `${hour}:${minute} ${amPm}`,
+      adultos: adults,
+      niños: children,
+      nombre: name,
+      email,
+      whatsapp,
+    };
+
+    const res = await enviarDirecto(payload);
+
+    if (res.ok) {
+      console.log("se enviaron los datos", payload);
+      limpiarStorage();
+      setConfirmed(true);
+    } else {
+      console.error(res.error);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex md:flex-row flex-col items-end">
@@ -110,16 +198,61 @@ const SectionReserva = ({ onClose }) => {
                 />
               )}
               {step === 5 && (
-                <PasoResumen
-                  name={name}
-                  selectedDate={selectedDate}
-                  hour={hour}
-                  minute={minute}
-                  amPm={amPm}
-                  adults={adults}
-                  children={children}
-                  onConfirm={() => setConfirmed(true)}
-                />
+                <>
+                  {isSending && <p>Enviando datos...</p>}
+                  {menu ? (
+                    <>
+                      {datos !== null && <Datos datos={datos} />}
+                      <p className="my-12 font-bold">Platos seleccionados</p>
+                      {cartItems.map((item, index) => (
+                        <div
+                          key={index}
+                          className="w-full flex items-center justify-between text-sm"
+                        >
+                          {/* Nombre del plato */}
+                          <p className="w-[40%]">{item.title}</p>
+
+                          {/* Precio */}
+                          <p className="w-[5rem] text-right RovelleUnoRegular">
+                            $
+                            {Number(
+                              item.price.replace(/\./g, "")
+                            ).toLocaleString("es-CO")}
+                          </p>
+
+                          {/* Botón eliminar */}
+                          <button
+                            onClick={() => removeFromCart(item.title)}
+                            className="ml-2 cursor-pointer hover:opacity-50"
+                          >
+                            <img
+                              className="w-4"
+                              src="/videos/cerrarReserva-09.svg"
+                              alt="Cerrar"
+                            />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        className="mt-12 px-6 py-2 border w-[27.5rem] border-[#fff6ea41] RovelleUnoBold rounded-full hover:bg-[#fff6ea] hover:text-black transition cursor-pointer"
+                        onClick={handleConfirmarReserva}
+                      >
+                        Confirmar reserva
+                      </button>
+                    </>
+                  ) : (
+                    <PasoResumen
+                      name={name}
+                      selectedDate={selectedDate}
+                      hour={hour}
+                      minute={minute}
+                      amPm={amPm}
+                      adults={adults}
+                      children={children}
+                      onConfirm={handleEnvio}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
@@ -161,7 +294,7 @@ const SectionReserva = ({ onClose }) => {
                   if (step === 1 && selectedDate) setStep(2);
                   else if (step === 2) setStep(3);
                   else if (step === 3) setStep(4);
-                  else if (step === 4) setStep(5);
+                  else if (step === 4) handleGuardarReserva();
                 }}
               >
                 Siguiente
@@ -175,3 +308,16 @@ const SectionReserva = ({ onClose }) => {
 };
 
 export default SectionReserva;
+
+export const Datos = ({ datos }) => {
+  return (
+    <p className="text-md RovelleUnoRegular">
+      <span className="capitalize">{datos.nombre || "Usuario"}</span> , estás
+      reservando una mesa para <strong>{datos.adultos}</strong> adulto
+      {datos.adultos !== 1 && "s"}
+      {datos.niños > 0 &&
+        ` y ${datos.niños} niño${datos.niños !== 1 ? "s" : ""}`}{" "}
+      el <strong>{datos.fecha}</strong> a la <strong>{datos.hora}</strong>.
+    </p>
+  );
+};

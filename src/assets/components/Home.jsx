@@ -59,7 +59,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="absolute bottom-30 z-[400] w-50 flex items-center justify-center">
+        <div className="absolute bottom-30 z-[400] w-50 flex items-center justify-center lg:hidden">
           <ReservaButton hiddenOnDesktop onClick={() => setShowReserva(true)} />
         </div>
 

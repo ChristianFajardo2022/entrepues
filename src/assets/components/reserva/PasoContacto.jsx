@@ -7,6 +7,7 @@ const PasoContacto = ({
   setName,
   setEmail,
   setWhatsapp,
+  
 }) => {
   return (
     <div className="flex flex-col z-10 md:w-full my-10 text-[#fff6ea] text-sm gap-8 RovelleUnoBold">

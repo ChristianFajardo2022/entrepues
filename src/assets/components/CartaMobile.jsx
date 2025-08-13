@@ -63,10 +63,19 @@ const CartaMobile = () => {
   const [activeCardIndexEntradas, setActiveCardIndexEntradas] = useState(null);
   const [activeCardIndexPlatos, setActiveCardIndexPlatos] = useState(null);
 
+  const handleReserva = () => {
+    setShowReserva(true);
+    setShowCart(false);
+  };
+
   return (
     <div className="relative w-full h-full text-white bg-black">
       <Iconoprincipal />
-      <CartModal isOpen={showCart} onClose={() => setShowCart(false)} />
+      <CartModal
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        handleReserva={handleReserva}
+      />
       {showMobileMenu && (
         <MobileMenu
           onClose={() => setShowMobileMenu(false)}
@@ -174,13 +183,17 @@ const CartaMobile = () => {
                               className="w-full h-full object-cover transition duration-500"
                               onClick={() =>
                                 setActiveCardIndexEntradas(
-                                  activeCardIndexEntradas === index ? null : index
+                                  activeCardIndexEntradas === index
+                                    ? null
+                                    : index
                                 )
                               }
                               style={{ cursor: "pointer" }}
                             />
                             <div className="absolute bottom-0 z-20 w-full h-12 bg-black bg-opacity-60 p-2 text-start text-white flex justify-between items-center">
-                              <h3 className="text-sm font-semibold">{item.title}</h3>
+                              <h3 className="text-sm font-semibold">
+                                {item.title}
+                              </h3>
                               <p
                                 style={{ color }}
                                 className="text-sm font-bold w-28 text-center"
@@ -194,18 +207,19 @@ const CartaMobile = () => {
                             {activeCardIndexEntradas === index && (
                               <div className="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/80 bg-opacity-80 text-white transition duration-500 p-4 text-center">
                                 <div className="mb-4 w-full flex justify-between items-center">
-                                <p>
-                                  <span className="text-lg font-bold">
-                                    {item.title}
-                                  </span>
-                                </p>
-                                <p>
-                                  {item.price
-                                    ? `$ ${Number(item.price.replace(/\./g, "")).toLocaleString("es-CO")}`
-                                    : "Precio no disponible"}
-                                </p>
-                                
-                                  </div>
+                                  <p>
+                                    <span className="text-lg font-bold">
+                                      {item.title}
+                                    </span>
+                                  </p>
+                                  <p>
+                                    {item.price
+                                      ? `$ ${Number(
+                                          item.price.replace(/\./g, "")
+                                        ).toLocaleString("es-CO")}`
+                                      : "Precio no disponible"}
+                                  </p>
+                                </div>
                                 <p className="text-sm mb-4 RovelleUnoBold">
                                   {item.description ||
                                     "Una deliciosa opción de nuestra carta regional."}
@@ -218,7 +232,9 @@ const CartaMobile = () => {
                                   Agregar al carrito
                                 </button>
                                 <button
-                                  onClick={() => setActiveCardIndexEntradas(null)}
+                                  onClick={() =>
+                                    setActiveCardIndexEntradas(null)
+                                  }
                                   className="mt-2 text-xs underline"
                                 >
                                   Cerrar

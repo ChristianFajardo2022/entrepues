@@ -6,6 +6,7 @@ import PasoContacto from "./reserva/PasoContacto";
 import PasoResumen from "./reserva/PasoResumen";
 import PasoConfirmacion from "./reserva/PasoConfirmacion";
 import Iconoprincipal from "./Iconoprincipal";
+import { useReservaStore } from "../../store/reservaStore";
 
 const SectionReservaMobile = ({ onClose }) => {
   const [step, setStep] = useState(1);
@@ -20,6 +21,50 @@ const SectionReservaMobile = ({ onClose }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+
+  const { guardarDatos, enviarDirecto } = useReservaStore();
+
+  const handleGuardarReserva = () => {
+    const formatDate = () => {
+      const options = { weekday: "long", day: "numeric", month: "long" };
+      return selectedDate.toLocaleDateString("es-CO", options);
+    };
+    const payload = {
+      fecha: formatDate(),
+      hora: `${hour}:${minute} ${amPm}`,
+      adultos: adults,
+      niños: children,
+      nombre: name,
+      email,
+      whatsapp,
+    };
+
+    guardarDatos(payload);
+  };
+
+  const handleEnvio = async () => {
+    const formatDate = () => {
+      const options = { weekday: "long", day: "numeric", month: "long" };
+      return selectedDate.toLocaleDateString("es-CO", options);
+    };
+    const payload = {
+      fecha: formatDate(),
+      hora: `${hour}:${minute} ${amPm}`,
+      adultos: adults,
+      niños: children,
+      nombre: name,
+      email,
+      whatsapp,
+    };
+
+    const res = await enviarDirecto(payload);
+    if (res.ok) {
+      console.log("se enviaron los datos", payload);
+      setConfirmed(true);
+    } else {
+      console.error(res.error);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-end w-full h-full">
@@ -105,15 +150,13 @@ const SectionReservaMobile = ({ onClose }) => {
                   amPm={amPm}
                   adults={adults}
                   children={children}
-                  onConfirm={() => setConfirmed(true)}
+                  onConfirm={handleEnvio}
+                  handleGuardarReserva={handleGuardarReserva}
                 />
               )}
             </>
           )}
         </div>
-
-
-
 
         <div className=" w-full h-auto  bg-black px-10">
           {/* Línea de progreso */}

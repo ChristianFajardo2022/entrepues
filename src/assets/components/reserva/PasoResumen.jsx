@@ -18,6 +18,10 @@ const PasoResumen = ({
     return selectedDate.toLocaleDateString("es-CO", options);
   };
 
+  const handleGuardar = () => {
+    navigate("/carta");
+  };
+
   return (
     <div className="flex flex-col z-10 gap-6 md:w-full w-3/4 text-[#fff6ea] RovelleUnoRegular">
       <p className="text-sm font-medium">Verifica la información:</p>
@@ -36,15 +40,20 @@ const PasoResumen = ({
 
       <div className="flex gap-4 justify-between mt-6 RovelleUnoRegular">
         <button
-          onClick={() => navigate("/carta")}
+          onClick={handleGuardar}
           className="flex-1 p-6 h-52 border rounded-xl text-left hover:bg-[#fff6ea] hover:text-black transition"
         >
           <div className=" h-[40%]">
             <img className=" w-12" src="/videos/tapa-09.svg" />
           </div>
           <div className=" h-[60%]">
-            <p className="text-md RovelleUnoBold">Reservar<br/> con menú</p>
-            <p className="text-sm RovelleUnoRegular">Escoger los platos de una vez.</p>
+            <p className="text-md RovelleUnoBold">
+              Reservar
+              <br /> con menú
+            </p>
+            <p className="text-sm RovelleUnoRegular">
+              Escoger los platos de una vez.
+            </p>
           </div>
         </button>
 
@@ -56,8 +65,13 @@ const PasoResumen = ({
             <img className=" w-8" src="/videos/libro-10.svg" />
           </div>
           <div className=" h-[60%]">
-            <p className="text-md RovelleUnoBold">Reservar<br/> sin menú</p>
-            <p className="text-sm RovelleUnoRegular">Escoger en el restaurante.</p>
+            <p className="text-md RovelleUnoBold">
+              Reservar
+              <br /> sin menú
+            </p>
+            <p className="text-sm RovelleUnoRegular">
+              Escoger en el restaurante.
+            </p>
           </div>
         </button>
       </div>

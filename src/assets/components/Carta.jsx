@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import menuData from "../data/menu.json";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +43,21 @@ const Carta = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("todos");
 
+  useEffect(() => {
+  const shouldBlockScroll = showReserva || showCart;
+
+  if (shouldBlockScroll) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  // Limpieza opcional por seguridad
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [showReserva, showCart]);
+
   const handleRegionClick = (region) => {
     setActiveRegion(region);
     setSearchTerm("");
@@ -66,10 +81,15 @@ const Carta = () => {
 
   const color = regionColors[activeRegion] || "#E89726";
 
+  const handleReserva = () => {
+    setShowReserva(true);
+    setShowCart(false);
+  };
+
   return (
     <div className="relative w-full h-full text-white">
       <Iconoprincipal />
-      <CartModal isOpen={showCart} onClose={() => setShowCart(false)} />
+      <CartModal isOpen={showCart} onClose={() => setShowCart(false)} handleReserva={handleReserva}/>
 
       <div className="absolute top-0 left-0 w-full h-screen">
         <video
@@ -94,7 +114,7 @@ const Carta = () => {
       </div>
 
       <div className="relative z-10 bg-transparent">
-{/*         <Link to="/">
+        {/*         <Link to="/">
           <img
             className="md:w-38 w-20 absolute md:left-40 left-10 top-10"
             src="/entrepues.svg"
@@ -343,7 +363,7 @@ const Carta = () => {
         </div>
 
         {showReserva && (
-          <SectionReserva onClose={() => setShowReserva(false)} />
+          <SectionReserva menu={true} onClose={() => setShowReserva(false)} />
         )}
       </div>
     </div>

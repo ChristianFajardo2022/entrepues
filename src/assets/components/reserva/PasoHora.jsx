@@ -1,6 +1,36 @@
 import React from "react";
 
 const PasoHora = ({ hour, minute, amPm, setHour, setMinute, setAmPm }) => {
+  // Helpers para avanzar/reducir horas y minutos en formato string
+  const incrementarHora = () => {
+    const next = Number(hour) < 12 ? Number(hour) + 1 : 1;
+    setHour(String(next).padStart(2, "0"));
+  };
+
+  const decrementarHora = () => {
+    const prev = Number(hour) > 1 ? Number(hour) - 1 : 12;
+    setHour(String(prev).padStart(2, "0"));
+  };
+
+  const incrementarMinuto = () => {
+    const next = Number(minute) === 0 ? 30 : 0;
+    setMinute(String(next).padStart(2, "0"));
+  };
+
+  const decrementarMinuto = () => {
+    const prev = Number(minute) === 30 ? 0 : 30;
+    setMinute(String(prev).padStart(2, "0"));
+  };
+
+  const cambiarAmPm = () => {
+    setAmPm((prev) => (prev === "am" ? "pm" : "am"));
+  };
+
+  const horaAnterior = String(Number(hour) === 1 ? 12 : Number(hour) - 1).padStart(2, "0");
+  const horaSiguiente = String(Number(hour) === 12 ? 1 : Number(hour) + 1).padStart(2, "0");
+  const minutoAlterno = minute === "00" ? "30" : "00";
+  const amPmAlterno = amPm === "am" ? "pm" : "am";
+
   return (
     <div className="flex flex-col z-10 items-center justify-center w-full my-16 RovelleUnoRegular">
       <div className="flex items-center justify-center gap-2 text-[1rem] relative">
@@ -8,19 +38,13 @@ const PasoHora = ({ hour, minute, amPm, setHour, setMinute, setAmPm }) => {
 
         {/* HORA */}
         <div className="flex flex-col items-center justify-center gap-3 w-16 h-40 overflow-hidden">
-          <button onClick={() => setHour((prev) => (prev < 12 ? prev + 1 : 1))}>
+          <button onClick={incrementarHora}>
             <img className="w-4" src="/flecha-despliegue.svg" alt="up" />
           </button>
-          <div className="text-sm text-[#ffffff55]">
-            {(hour === 1 ? 12 : hour - 1).toString().padStart(2, "0")}
-          </div>
-          <div className="rounded px-4 py-1 text-white">
-            {hour.toString().padStart(2, "0")}
-          </div>
-          <div className="text-sm text-[#ffffff55]">
-            {(hour === 12 ? 1 : hour + 1).toString().padStart(2, "0")}
-          </div>
-          <button onClick={() => setHour((prev) => (prev > 1 ? prev - 1 : 12))}>
+          <div className="text-sm text-[#ffffff55]">{horaAnterior}</div>
+          <div className="rounded px-4 py-1 text-white">{hour}</div>
+          <div className="text-sm text-[#ffffff55]">{horaSiguiente}</div>
+          <button onClick={decrementarHora}>
             <img className="w-4 rotate-180" src="/flecha-despliegue.svg" alt="down" />
           </button>
         </div>
@@ -29,28 +53,26 @@ const PasoHora = ({ hour, minute, amPm, setHour, setMinute, setAmPm }) => {
 
         {/* MINUTOS */}
         <div className="flex flex-col items-center justify-center gap-3 w-16 h-40 overflow-hidden">
-          <button onClick={() => setMinute((prev) => (prev === 0 ? 30 : 0))}>
+          <button onClick={incrementarMinuto}>
             <img className="w-4" src="/flecha-despliegue.svg" alt="up" />
           </button>
-          <div className="text-sm text-[#ffffff55]">{minute === 0 ? "30" : "00"}</div>
-          <div className="rounded px-4 py-1 text-white">
-            {minute.toString().padStart(2, "0")}
-          </div>
-          <div className="text-sm text-[#ffffff55]">{minute === 0 ? "30" : "00"}</div>
-          <button onClick={() => setMinute((prev) => (prev === 30 ? 0 : 30))}>
+          <div className="text-sm text-[#ffffff55]">{minutoAlterno}</div>
+          <div className="rounded px-4 py-1 text-white">{minute}</div>
+          <div className="text-sm text-[#ffffff55]">{minutoAlterno}</div>
+          <button onClick={decrementarMinuto}>
             <img className="w-4 rotate-180" src="/flecha-despliegue.svg" alt="down" />
           </button>
         </div>
 
         {/* AM/PM */}
         <div className="flex flex-col items-center justify-center gap-3 w-16 h-40 overflow-hidden">
-          <button onClick={() => setAmPm((prev) => (prev === "am" ? "pm" : "am"))}>
+          <button onClick={cambiarAmPm}>
             <img className="w-4" src="/flecha-despliegue.svg" alt="up" />
           </button>
-          <div className="text-sm text-[#ffffff55]">{amPm === "am" ? "pm" : "am"}</div>
+          <div className="text-sm text-[#ffffff55]">{amPmAlterno}</div>
           <div className="rounded px-4 py-1 text-white uppercase">{amPm}</div>
-          <div className="text-sm text-[#ffffff55]">{amPm === "am" ? "pm" : "am"}</div>
-          <button onClick={() => setAmPm((prev) => (prev === "am" ? "pm" : "am"))}>
+          <div className="text-sm text-[#ffffff55]">{amPmAlterno}</div>
+          <button onClick={cambiarAmPm}>
             <img className="w-4 rotate-180" src="/flecha-despliegue.svg" alt="down" />
           </button>
         </div>
