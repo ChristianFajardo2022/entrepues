@@ -16,6 +16,7 @@
     "@tailwindcss/postcss": "^4.0.13",
     "@types/three": "^0.176.0",
     "date-fns": "^4.1.0",
+    "firebase": "^12.1.0",
     "framer-motion": "^12.9.2",
     "gsap": "^3.13.0",
     "lottie-react": "^2.4.1",

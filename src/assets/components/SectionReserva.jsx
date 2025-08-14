@@ -21,7 +21,7 @@ export const confirmarReserva = async (
     clearCart();
     setConfirmed(true);
 
-    console.log(res);
+    console.log(res.ok);
   } else {
     console.error(res.error);
   }

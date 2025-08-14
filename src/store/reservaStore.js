@@ -1,16 +1,9 @@
 import { create } from "zustand";
-
-/**
- * Reserva Store - Versión simplificada
- * - Recibe un objeto completo desde fuera y lo guarda en localStorage
- * - Tiene función para limpiar localStorage
- * - Tiene función placeholder para enviar a la base de datos
- */
+import { guardarReservaEnFirestore } from "../firebase/firestore";
 
 const STORAGE_KEY = "reserva:payload:v1";
 
 export const useReservaStore = create((set, get) => {
-  // Al iniciar el store, intenta cargar del localStorage
   let datosGuardados = null;
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -40,7 +33,7 @@ export const useReservaStore = create((set, get) => {
       set({ modoServicio: valor });
     },
 
-    /** Simula el envío a la base de datos y limpia si es exitoso */
+    /** Envía los datos a Firestore y limpia el storage si es exitoso */
     enviarDatos: async (extras = {}) => {
       const { datos, modoServicio } = get();
       if (!datos) return { ok: false, error: "No hay datos para enviar" };
@@ -53,9 +46,8 @@ export const useReservaStore = create((set, get) => {
 
       set({ isSending: true });
       try {
-        // TODO: Aquí conectas tu API real
-        // await fetch('/api/reservas', { method: 'POST', body: JSON.stringify(payload) })
-        await new Promise((r) => setTimeout(r, 300));
+        const res = await guardarReservaEnFirestore(payload);
+        if (!res.ok) throw new Error(res.error);
 
         localStorage.removeItem(STORAGE_KEY);
         set({
@@ -63,29 +55,30 @@ export const useReservaStore = create((set, get) => {
           isSending: false,
           lastSentAt: new Date().toISOString(),
         });
-        return { ok: true, data: payload };
+
+        return { ok: true, id: res.id, data: payload };
       } catch (error) {
         set({ isSending: false });
         return { ok: false, error: error.message || "Error desconocido" };
       }
     },
 
-    /** Enviar directamente a la base de datos sin guardar en localStorage */
+    /** Enviar directamente a Firestore sin pasar por storage */
     enviarDirecto: async (payload) => {
       set({ isSending: true });
       try {
-        // TODO: Aquí conectas tu API real
-        // await fetch('/api/reservas', { method: 'POST', body: JSON.stringify(payload) })
-        await new Promise((r) => setTimeout(r, 300));
+        const res = await guardarReservaEnFirestore(payload);
+        if (!res.ok) throw new Error(res.error);
+
         set({ isSending: false, lastSentAt: new Date().toISOString() });
-        return { ok: true };
+        return { ok: true, id: res.id };
       } catch (error) {
         set({ isSending: false });
         return { ok: false, error: error.message || "Error desconocido" };
       }
     },
 
-    /** Limpia localStorage manualmente */
+    /** Limpia el localStorage manualmente */
     limpiarStorage: () => {
       try {
         localStorage.removeItem(STORAGE_KEY);
