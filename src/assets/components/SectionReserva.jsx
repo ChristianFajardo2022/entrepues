@@ -102,7 +102,7 @@ const SectionReserva = ({ menu, onClose }) => {
     const res = await enviarDirecto(payload);
 
     if (res.ok) {
-      console.log("se enviaron los datos", payload);
+      console.log("se enviaron los datos");
       limpiarStorage();
       setConfirmed(true);
     } else {
