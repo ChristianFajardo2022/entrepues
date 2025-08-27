@@ -112,14 +112,7 @@ const SectionReserva = ({ menu, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex md:flex-row flex-col items-end">
-      <Iconoprincipal />
-      {/* Lado izquierdo con blur */}
-      <div className="md:w-[60%] w-full md:h-full h-[25%]  bg-black/30 backdrop-blur-sm">
-        {/*         <Link className="absolute  left-40 top-10 md:block hidden" to="/">
-          <img className="w-38 z-50" src="/entrepues.svg" alt="Logo" />
-        </Link>
- */}{" "}
-      </div>
+      <div className="md:w-[60%] w-full md:h-full h-[25%]  bg-black/30 backdrop-blur-sm"></div>
 
       {/* Lado derecho */}
       <div className="md:w-[40%] w-full md:h-full h-[75%] text-[#fff6ea] p-10 relative flex flex-col items-center">

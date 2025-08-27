@@ -1,93 +1,97 @@
 @import "tailwindcss";
 @import "react-datepicker/dist/react-datepicker.css";
 
-
+@font-face {
+  font-family: "DansonBold";
+  src: url("/fonts/DansonBold.ttf") format("truetype");
+}
 
 @font-face {
-    font-family: "DansonBold";
-    src: url("/fonts/DansonBold.ttf") format("truetype");
-  }
-  
-  @font-face {
-    font-family: "DansonRegular";
-    src: url("/fonts/DansonRegular.ttf") format("truetype");
-  }
-  @font-face {
-    font-family: "DansonLight";
-    src: url("/fonts/DANSON-LIGHT.ttf") format("truetype");
-  }
-  
-  @font-face {
-    font-family: "DansonSemiBold";
-    src: url("/fonts/DansonSemiBold.ttf") format("truetype");
-  }
-  @font-face {
-    font-family: "Inter";
-    src: url("/fonts/Inter-VariableFont_slnt,wght.ttf") format("truetype");
-  }
-  @font-face {
-    font-family: "RovelleUno-Bold";
-    src: url("/fonts/RovelleUno-Bold.ttf") format("truetype");
-  }
-  @font-face {
-    font-family: "RovelleUno-Light";
-    src: url("/fonts/RovelleUno-Light.ttf") format("truetype");
-  }
+  font-family: "DansonRegular";
+  src: url("/fonts/DansonRegular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "DansonLight";
+  src: url("/fonts/DANSON-LIGHT.ttf") format("truetype");
+}
 
-  @font-face {
-    font-family: "RovelleUno-Regular";
-    src: url("/fonts/RovelleUno-Regular.ttf") format("truetype");
-  }
+@font-face {
+  font-family: "DansonSemiBold";
+  src: url("/fonts/DansonSemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-VariableFont_slnt,wght.ttf") format("truetype");
+}
+@font-face {
+  font-family: "RovelleUno-Bold";
+  src: url("/fonts/RovelleUno-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "RovelleUno-Light";
+  src: url("/fonts/RovelleUno-Light.ttf") format("truetype");
+}
 
-  body{
-    @apply bg-black
-  }
-  .Inter{
-    font-family: Inter;
-  }
-  .DansonRegular
-  {
-    font-family: DansonRegular;
-  }
-  .DansonLight
-  {
-    font-family: DansonLight;
-  }
-  .DansonBold {
-    font-family: DansonBold;
-  }
-  .DansonSemiBold {
-    font-family: DansonSemiBold;
-  }
-  .RovelleUnoLight {
-    font-family: RovelleUno-Light;
-  }
-  .RovelleUnoRegular {
-    font-family: RovelleUno-Regular;
-  }
-  .RovelleUnoBold {
-    font-family: RovelleUno-Bold;
-  }
+@font-face {
+  font-family: "RovelleUno-Regular";
+  src: url("/fonts/RovelleUno-Regular.ttf") format("truetype");
+}
 
-  h1 {
-    font-family: DansonSemiBold;
-  }
-  h2 {
-    font-family: DansonRegular;
-    @apply  text-2xl
-  }
+@theme inline {
+  --color-secondary: var(--secondary);
+}
+:root {
+  --secondary: #fff6ea;
+}
 
-  option {
-    background-color: black;
+body {
+  @apply bg-black;
+}
+.Inter {
+  font-family: Inter;
+}
+.DansonRegular {
+  font-family: DansonRegular;
+}
+.DansonLight {
+  font-family: DansonLight;
+}
+.DansonBold {
+  font-family: DansonBold;
+}
+.DansonSemiBold {
+  font-family: DansonSemiBold;
+}
+.RovelleUnoLight {
+  font-family: RovelleUno-Light;
+}
+.RovelleUnoRegular {
+  font-family: RovelleUno-Regular;
+}
+.RovelleUnoBold {
+  font-family: RovelleUno-Bold;
+}
+
+h1 {
+  font-family: DansonSemiBold;
+}
+h2 {
+  font-family: DansonRegular;
+  @apply text-2xl;
+}
+
+option {
+  background-color: black;
 }
 input {
   font-family: RovelleUno-Light !important;
 }
 ::placeholder {
-  @apply font-semibold
+  font-family: DansonRegular;
 }
-
-
+button {
+  font-family: RovelleUno-Bold;
+}
 .button-underline-animated {
   position: relative;
   display: inline-block;
@@ -136,19 +140,14 @@ input {
   content: none;
 }
 
-
 /* -----------------------------------------------------------------
  */
 
-
-
-
-  .buttonConsultar {
-    font-family: Inter;
-   @apply text-white bg-black font-bold
-  }
+.buttonConsultar {
+  font-family: Inter;
+  @apply text-white bg-black font-bold;
+}
 /* Aplica un fondo blanco y un borde redondeado al calendario */
-
 
 .react-datepicker {
   background-color: transparent !important;
@@ -159,15 +158,14 @@ input {
 .react-datepicker__month-container {
   display: block;
   width: 100%;
-
 }
 h2.react-datepicker__current-month {
-    padding: 0;
-    margin: 0;
-    display: flex;
+  padding: 0;
+  margin: 0;
+  display: flex;
 }
 
- .react-datepicker__day,
+.react-datepicker__day,
 .react-datepicker__day-name {
   width: 3.8rem !important;
   height: 2.5rem !important;
@@ -175,7 +173,6 @@ h2.react-datepicker__current-month {
   margin: 0 !important;
   padding: 2px;
   text-align: center;
-
 }
 @media (max-width: 640px) {
   .react-datepicker__day,
@@ -183,21 +180,31 @@ h2.react-datepicker__current-month {
     width: 3rem !important;
   }
 }
- 
-.react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range, .react-datepicker__quarter-text--selected, .react-datepicker__quarter-text--in-selecting-range, .react-datepicker__quarter-text--in-range, .react-datepicker__year-text--selected, .react-datepicker__year-text--in-selecting-range, .react-datepicker__year-text--in-range {
-    border-radius: 0.3rem;
-    background-color: #216ba5;
-    color: #fff;
-    width: 2rem !important;
-    height: 2rem !important;
-    padding: 0 25px 0 25px;
-    align-items: center;
+
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range,
+.react-datepicker__month-text--selected,
+.react-datepicker__month-text--in-selecting-range,
+.react-datepicker__month-text--in-range,
+.react-datepicker__quarter-text--selected,
+.react-datepicker__quarter-text--in-selecting-range,
+.react-datepicker__quarter-text--in-range,
+.react-datepicker__year-text--selected,
+.react-datepicker__year-text--in-selecting-range,
+.react-datepicker__year-text--in-range {
+  border-radius: 0.3rem;
+  background-color: #216ba5;
+  color: #fff;
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0 25px 0 25px;
+  align-items: center;
 }
 
 .react-datepicker__header {
   background-color: transparent !important;
-      border-bottom: 1px solid #fff6ea50 !important;
-
+  border-bottom: 1px solid #fff6ea50 !important;
 }
 
 h2.react-datepicker__current-month {
@@ -213,13 +220,24 @@ h2.react-datepicker__current-month {
   color: #fff6ea !important;
 }
 
-.react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range, .react-datepicker__quarter-text--selected, .react-datepicker__quarter-text--in-selecting-range, .react-datepicker__quarter-text--in-range, .react-datepicker__year-text--selected, .react-datepicker__year-text--in-selecting-range, .react-datepicker__year-text--in-range {
-    border-radius: 100% !important;
-    background-color: #fff6ea !important;
-    color: #080808 !important;
-    font-weight: bold !important;
-    width: auto !important;
-    height: auto;
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range,
+.react-datepicker__month-text--selected,
+.react-datepicker__month-text--in-selecting-range,
+.react-datepicker__month-text--in-range,
+.react-datepicker__quarter-text--selected,
+.react-datepicker__quarter-text--in-selecting-range,
+.react-datepicker__quarter-text--in-range,
+.react-datepicker__year-text--selected,
+.react-datepicker__year-text--in-selecting-range,
+.react-datepicker__year-text--in-range {
+  border-radius: 100% !important;
+  background-color: #fff6ea !important;
+  color: #080808 !important;
+  font-weight: bold !important;
+  width: auto !important;
+  height: auto;
 }
 .react-datepicker__day:hover {
   background-color: #dd830e1c;
@@ -230,8 +248,11 @@ h2.react-datepicker__current-month {
   border-radius: 10%;
 }
 
-.react-datepicker__day--keyboard-selected, .react-datepicker__month-text--keyboard-selected, .react-datepicker__quarter-text--keyboard-selected, .react-datepicker__year-text--keyboard-selected {
-    border-radius: 0.3rem;
-    background-color: rgb(81 82 83) !important;
-    color: rgb(0, 0, 0);
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__quarter-text--keyboard-selected,
+.react-datepicker__year-text--keyboard-selected {
+  border-radius: 0.3rem;
+  background-color: rgb(81 82 83) !important;
+  color: rgb(0, 0, 0);
 }
