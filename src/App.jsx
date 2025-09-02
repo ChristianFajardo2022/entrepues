@@ -7,6 +7,7 @@ import Video360 from "./Video360";
 import Ubicacion from "./assets/components/Ubicacion";
 import CartaMobile from "./assets/components/CartaMobile";
 import { HomeTwo } from "./assets/components/HomeTwo";
+import { Menu } from "./assets/components/Menu/menu";
 
 function App() {
   const [count, setCount] = useState(6);
@@ -16,7 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeTwo />} />
         {/* <Route path="/" element={<Home />} /> */}
-        <Route path="/carta" element={<Carta />} />
+        <Route path="/carta" element={<Menu />} />
         <Route path="/cartam" element={<CartaMobile />} />
         <Route path="/ubicacion" element={<Ubicacion />} />
         <Route
