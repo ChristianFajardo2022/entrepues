@@ -61,7 +61,7 @@ export const VideoSphere = ({
             img={img}
             ubicacion={`${
               visible === index ? "hidden" : ""
-            } bg-white border-white`}
+            } bg-transparent`}
           />
         </Html>
       ))}

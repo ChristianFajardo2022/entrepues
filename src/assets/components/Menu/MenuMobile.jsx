@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Content } from "../home/Content";
 import ProductPopup from "./ProductPopup";
+import useCartStore from "../../../store/cartStore"; // ⬅️ ajusta la ruta si aplica
 
 // Helpers y data (puedes extraerlos si ya los tienes en otro archivo)
 const normalize = (s = "") =>
@@ -11,16 +12,12 @@ const normalize = (s = "") =>
     .toLowerCase()
     .trim()
     .replace(/\s+/g, " ");
-const softKey = (s = "") =>
-  normalize(s).replace(/\bs\b/g, "").replace(/s\b/g, "");
+const softKey = (s = "") => normalize(s).replace(/\bs\b/g, "").replace(/s\b/g, "");
 
 const categorias = [
   { nombre: "Desayunos", subcategorias: ["Desayunos"] },
   { nombre: "Entradas", subcategorias: ["Frías", "Calientes", "Vegetarianas"] },
-  {
-    nombre: "Platos fuertes",
-    subcategorias: ["Carne", "Pollo", "Pescado", "Vegetariano"],
-  },
+  { nombre: "Platos fuertes", subcategorias: ["Carne", "Pollo", "Pescado", "Vegetariano"] },
   { nombre: "Bebidas", subcategorias: ["Sin alcohol", "Con alcohol"] },
   { nombre: "Postres", subcategorias: ["Tortas", "Helados", "Frutas"] },
 ];
@@ -464,6 +461,22 @@ const MenuMobile = () => {
   const scrollHastaAcaRef = useRef(null);
   const TOGGLE_ICON = "/imagenes/triangulo.svg";
 
+  // === Cart (Zustand) ===
+  const addToCart = useCartStore((s) => s.addToCart);
+  const cartItems = useCartStore((s) => s.cartItems);
+  const toCartItem = (p) => ({
+    id: p.id,
+    title: p.nombre,      // tu store compara por "title"
+    price: p.precio,
+    image: p.imagen,
+    description: p.descripcion,
+  });
+
+  // Logs reactivos del carrito
+  useEffect(() => {
+    console.log("[MenuMobile] cartItems cambió:", cartItems);
+  }, [cartItems]);
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(true), 2500);
     return () => clearTimeout(timer);
@@ -483,12 +496,9 @@ const MenuMobile = () => {
   const activeCatObj = categorias.find(
     (c) => softKey(c.nombre) === softKey(categoriaActiva)
   );
-  const activeCatName = activeCatObj
-    ? activeCatObj.nombre
-    : categorias[0].nombre;
+  const activeCatName = activeCatObj ? activeCatObj.nombre : categorias[0].nombre;
   const bannerSrc =
-    bannerPorCategoria[activeCatName] ??
-    bannerPorCategoria[categorias[0].nombre];
+    bannerPorCategoria[activeCatName] ?? bannerPorCategoria[categorias[0].nombre];
 
   const productosFiltrados = useMemo(() => {
     const q = normalize(busqueda);
@@ -520,7 +530,8 @@ const MenuMobile = () => {
       maximumFractionDigits: 0,
     }).format(n);
 
-  return (
+
+return (
     <motion.div
       initial={{ width: "100%", paddingTop: 0 }}
       animate={{ width: "100%", paddingTop: "7.8rem" }}
@@ -585,9 +596,7 @@ const MenuMobile = () => {
               />
 
               <div className="h-full">
-                <h2 className="RovelleUnoBold text-[#FFF6EA] mb-2">
-                  Categorías
-                </h2>
+                <h2 className="RovelleUnoBold text-[#FFF6EA] mb-2">Categorías</h2>
                 <ul className="flex gap-2 overflow-x-auto w-auto scrollbar-thin scrollbar-thumb-[#FFF6EA]/40 scrollbar-track-transparent">
                   {categorias.map((cat) => {
                     const isOpen = categoriaAbierta === cat.nombre;
@@ -669,11 +678,11 @@ const MenuMobile = () => {
           <div className="w-full cardsImagenes mt-8">
             <div
               className="
-                  grid 
-                  grid-cols-2
-                  auto-rows-fr 
-                  gap-6 w-full px-2
-                "
+                grid 
+                grid-cols-2
+                auto-rows-fr 
+                gap-6 w-full px-2
+              "
             >
               {productosFiltrados.length === 0 ? (
                 <div className="col-span-full flex items-center justify-center text-[#FFF6EA]/80">
@@ -683,24 +692,47 @@ const MenuMobile = () => {
                 productosFiltrados.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-lg shadow-lg flex flex-col w-full h-full min-w-0 hover:scale-105 transition-transform duration-200 cursor-pointer"
-                    onClick={() => handleOpenPopup(item)}
+                    className="rounded-lg shadow-lg flex flex-col w-full h-full min-w-0 transition-transform duration-200 cursor-default"
                   >
-                    <img
-                      src={item.imagen}
-                      alt={item.nombre}
-                      className="w-full h-50 object-cover rounded-md mb-3"
-                    />
+                    {/* Imagen (única parte clickeable para abrir el popup) */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleOpenPopup(item)}
+                      onKeyDown={(e) => e.key === "Enter" && handleOpenPopup(item)}
+                      className="w-full h-50 overflow-hidden rounded-md mb-3 cursor-pointer"
+                    >
+                      <img
+                        src={item.imagen}
+                        alt={item.nombre}
+                        className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+                      />
+                    </div>
+
+                    {/* Datos + botón carrito (no abren el popup) */}
                     <div className="w-full flex flex-col items-start">
                       <span className="text-[#FFF6EA] font-semibold text-base mb-1">
                         {item.nombre}
                       </span>
+
                       <div className="flex w-full justify-between items-center">
                         <span className="text-[#FFF6EA] text-sm mb-2">
                           {formatoCOP(item.precio)}
                         </span>
+
                         <button
-                          className="rounded-full p-2 flex items-center justify-center"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation(); // por si acaso
+                            const payload = toCartItem(item);
+                            console.log("[click] Intentando agregar al carrito:", payload);
+                            addToCart(payload);
+                            console.log(
+                              "[store] cartItems ahora:",
+                              useCartStore.getState().cartItems
+                            );
+                          }}
+                          className="rounded-full p-2 flex items-center justify-center hover:scale-110 transition-transform"
                           aria-label={`Agregar ${item.nombre} al carrito`}
                         >
                           <img
@@ -719,7 +751,6 @@ const MenuMobile = () => {
         </>
       )}
     </motion.div>
-  );
-};
+  );};
 
 export default MenuMobile;

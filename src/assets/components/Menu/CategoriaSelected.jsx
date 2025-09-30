@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import ProductPopup from "./ProductPopup";
+import useCartStore from "../../../store/cartStore"; // ajusta la ruta si aplica
 
 /* ====== HELPERS DE NORMALIZACIÓN ====== */
 const normalize = (s = "") =>
@@ -463,6 +464,16 @@ const CategoriaSelected = ({ category = "Desayunos" }) => {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const TOGGLE_ICON = "/imagenes/triangulo.svg"; // tu imagen base (apuntando hacia arriba)
 
+  // === Cart (Zustand) ===
+  const addToCart = useCartStore((s) => s.addToCart);
+  const toCartItem = (p) => ({
+    id: p.id,
+    title: p.nombre,
+    price: p.precio,
+    image: p.imagen,
+    description: p.descripcion,
+  });
+
   // Si cambia la prop category desde el padre, sincroniza con tolerancia a singular/plural/acentos
   useEffect(() => {
     const incoming = softKey(category);
@@ -511,8 +522,13 @@ const CategoriaSelected = ({ category = "Desayunos" }) => {
       currency: "COP",
       maximumFractionDigits: 0,
     }).format(n);
+  // === Logs de depuración del carrito ===
+  const cartItems = useCartStore((s) => s.cartItems);
+  useEffect(() => {
+    console.log('[CategoriaSelected] cartItems cambió:', cartItems);
+  }, [cartItems]);
 
-  return (
+ return (
     <>
       {/* Blur de fondo cuando el popup está abierto */}
       <AnimatePresence>
@@ -543,11 +559,11 @@ const CategoriaSelected = ({ category = "Desayunos" }) => {
           Recomendado de la semana
         </span>
         <div className="relative">
-          <div className="absolute top-15 left-20 flex flex-col gap-6 w-[15rem]">
+          <div className="absolute top-15 left-20 flex flex-col gap-6 w-[18rem]">
             <span className="text-[#FFF6EA] text-3xl tracking-widest DansonSemiBold">
-              Biztec <br /> a caballo
+              Bistec a caballo
             </span>
-            <button className="bg-[#FFF6EA] text-black px-4 py-3 rounded-lg w-full cursor-pointer">
+            <button className="bg-[#FFF6EA] text-black px-4 py-3 rounded-lg cursor-pointer w-[15rem]">
               Marchar el plato
             </button>
           </div>
@@ -672,24 +688,52 @@ const CategoriaSelected = ({ category = "Desayunos" }) => {
                 productosFiltrados.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-lg shadow-lg flex flex-col w-full h-full overflow-hidden min-w-0 hover:scale-105 transition-transform duration-200 cursor-pointer"
-                    onClick={() => handleOpenPopup(item)}
+                    className="rounded-lg shadow-lg flex flex-col w-full h-full overflow-hidden min-w-0 transition-transform duration-200 cursor-default"
                   >
-                    <img
-                      src={item.imagen}
-                      alt={item.nombre}
-                      className="w-full h-80 object-cover rounded-md mb-3"
-                    />
+                    {/* Imagen (única parte clickeable para abrir el popup) */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleOpenPopup(item)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && handleOpenPopup(item)
+                      }
+                      className="w-full h-80 overflow-hidden rounded-md mb-3 cursor-pointer"
+                    >
+                      <img
+                        src={item.imagen}
+                        alt={item.nombre}
+                        className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+                      />
+                    </div>
+
+                    {/* Datos + botón carrito (no abren el popup) */}
                     <div className="w-full flex flex-col items-start">
                       <span className="text-[#FFF6EA] font-semibold text-base mb-1">
                         {item.nombre}
                       </span>
+
                       <div className="flex w-full justify-between items-center">
                         <span className="text-[#FFF6EA] text-sm mb-2">
                           {formatoCOP(item.precio)}
                         </span>
+
                         <button
-                          className="rounded-full p-2 flex items-center justify-center"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation(); // por si acaso
+                            const payload = toCartItem(item);
+                            console.log(
+                              "[click] Intentando agregar al carrito:",
+                              payload
+                            );
+                            addToCart(payload);
+                            console.log(
+                              "[store] cartItems ahora:",
+                              useCartStore.getState().cartItems
+                            );
+                          }}
+                          className="rounded-full p-2 flex items-center justify-center hover:scale-200 cursor-pointer transition-transform"
                           aria-label={`Agregar ${item.nombre} al carrito`}
                         >
                           <img
@@ -708,7 +752,6 @@ const CategoriaSelected = ({ category = "Desayunos" }) => {
         </div>
       </motion.div>
     </>
-  );
-};
+  );};
 
 export default CategoriaSelected;

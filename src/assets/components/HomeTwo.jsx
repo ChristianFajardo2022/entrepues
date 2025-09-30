@@ -144,13 +144,13 @@ export const HomeTwo = () => {
       <Content loading={loading} setShowReserva={setShowReserva} />
       {loading && (
         <div className="w-full flex flex-col gap-10 text-2xl absolute left-0 bottom-0 z-[201] mb-16">
-          <div className="flex md:flex-row flex-col justify-center items-center gap-4 font-medium overflow-hidden">
+          <div className="flex md:flex-row flex-col justify-center items-center gap-4 font-medium RovelleUnoBold overflow-hidden">
             <motion.a
               href="/carta"
               initial={{ y: 100 }}
               animate={{ y: 0 }}
               transition={{ delay: 1.5, ease: "easeInOut" }}
-              className="cursor-pointer text-[color:var(--secondary)] text-center border border-secondary rounded-md min-w-52 py-1 pb-2"
+              className="cursor-pointer text-[color:var(--secondary)] text-center hover:bg-[#fff6ea] hover:text-black border border-secondary rounded-md min-w-52 py-1 pb-2"
             >
               Menú
             </motion.a>
@@ -168,7 +168,7 @@ export const HomeTwo = () => {
               initial={{ y: 100 }}
               animate={{ y: 0 }}
               transition={{ delay: 2, ease: "easeInOut" }}
-              className="cursor-pointer text-[color:var(--secondary)] text-center border border-secondary rounded-md min-w-52 py-1 pb-2"
+              className="cursor-pointer text-[color:var(--secondary)] hover:bg-[#fff6ea] hover:text-black text-center border border-secondary rounded-md min-w-52 py-1 pb-2"
             >
               Descúbrenos
             </motion.a>
