@@ -164,7 +164,7 @@ export const HomeTwo = () => {
               Reservar
             </motion.button>
             <motion.a
-              href="/video"
+              href="/descubrenos"
               initial={{ y: 100 }}
               animate={{ y: 0 }}
               transition={{ delay: 2, ease: "easeInOut" }}

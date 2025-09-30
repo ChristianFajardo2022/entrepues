@@ -32,7 +32,7 @@ function App() {
         <Route path="/cartam" element={<CartaMobile />} />
         <Route path="/ubicacion" element={<Ubicacion />} />
         <Route
-          path="/video"
+          path="/descubrenos"
           element={
             <div
               style={{ position: "relative", width: "100vw", height: "100vh" }}
