@@ -14,7 +14,7 @@ const MobileMenu = ({ onClose, onReservaClick }) => (
 
       <nav className="mt-20 flex flex-col gap-15 text-2xl tracking-[0.2em] DansonBold">
         <p className="border-b border-white/30 pb-2">BIENVENIDOS</p>
-        <Link to="/video" onClick={onClose}>VISITA 360°</Link>
+        <Link to="/descubrenos" onClick={onClose}>VISITA 360°</Link>
         <Link to="/cartam" onClick={onClose}>CARTA</Link>
       </nav>
     </div>

@@ -140,7 +140,7 @@ export const Content = ({ loading, setShowReserva, onlyHomeTwo = false }) => {
                     Reservar
                   </motion.button>
                   <motion.a
-                    href="/video"
+                    href="/descubrenos"
                     initial={{ y: 100 }}
                     animate={{ y: 0 }}
                     transition={{ delay: 2, ease: "easeInOut" }}
@@ -238,7 +238,7 @@ export const Content = ({ loading, setShowReserva, onlyHomeTwo = false }) => {
                   <div className="flex h-[40%] RovelleUnoBold flex-col justify-around items-center gap-6 text-2xl">
 
                   <a
-                    href="/video"
+                    href="/descubrenos"
                     className="self-center inline-block py-3 border-b-2 border-transparent hover:border-white transition-colors duration-200"
                     onClick={() => setMenuOpen(false)}
                   >
