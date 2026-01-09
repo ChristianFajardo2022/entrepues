@@ -34,7 +34,8 @@ const ProductPopup = ({ open, onClose, producto, onAdd }) => {
               {/* Info */}
               <div className="md:w-1/2 w-full flex flex-col justify-between h-auto md:py-10 py-5 md:pr-10 px-5">
                 <button
-                  className="text-[#FFF6EA] text-xs absolute md:top-4 top-30 right-2 z-50 cursor-pointer"
+                  className="text-[#FFF6EA] text-xs absolute md:top-4 top-30 
+                  right-2 z-50 cursor-pointer"
                   onClick={onClose}
                 >
                   <img
