@@ -9,6 +9,10 @@ export const ROUTES = {
   MENU_MOBILE: "/cartam",
   LOCATION: "/ubicacion",
   VIDEO_360: "/descubrenos",
+  ADMIN: "/admin",
+  ADMIN_RESERVAS: "/admin/reservas",
+  ADMIN_CONFIG: "/admin/configuracion",
+  ADMIN_STORAGE: "/admin/storage",
 };
 
 /**
