@@ -67,6 +67,8 @@ export const Button = ({
       "font-parkson tracking-widest flex justify-center items-center gap-1 cursor-pointer text-center bg-brown/60 text-secondary border border-secondary/40 rounded-full py-1.5 pb-2 hover:opacity-65 ease-in-out duration-300",
     "button-thirty":
       "font-light tracking-widest flex justify-center items-center gap-1 cursor-pointer text-center text-brown ease-in-out duration-300",
+    "button-dark":
+      "flex justify-center items-center gap-1 cursor-pointer text-center text-secondary bg-dark hover:bg-dark/80 rounded-full ease-in-out duration-300",
     "just-icon":
       "flex h-fit transition-opacity hover:opacity-70 ease-in-out duration-300",
     "just-icon-rounded":
@@ -120,6 +122,20 @@ export const Button = ({
         </motion.button>
       );
     case "button-thirty":
+      return (
+        <motion.button
+          {...motionProps}
+          {...props}
+          className={`${getWidthClass(width)} ${getFontSizeClass(fontSize)} ${
+            listas[type]
+          } ${customClass}`}
+          onClick={onClick}
+        >
+          {Icon && <Icon size={getIconSize(iconSize)} className="" />}
+          {title}
+        </motion.button>
+      );
+    case "button-dark":
       return (
         <motion.button
           {...motionProps}

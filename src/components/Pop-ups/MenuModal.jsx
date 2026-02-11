@@ -23,7 +23,7 @@ import { capitalizeFirst } from "../../constants/firsLetterUppercase";
 import useReservaStore from "../../store/reservaStore";
 import { CardItems } from "../carrito/cardItems";
 import { CardsProducts } from "../menu/CardsProducts";
-import { p } from "framer-motion/client";
+ 
 
 /**
  * Modal del menú con integración de Firebase
@@ -268,7 +268,7 @@ export default function MenuModal() {
         close={true}
         BackModal={handleBack}
       >
-        <div className="w-full max-w-4xl h-full flex flex-col">
+        <div className="w-full max-w-4xl h-full flex flex-col mx-auto">
           <div className="w-full mx-auto">
             {/* Versión grid para desktop + scroll responsive */}
             <div className="flex gap-4 items-center bg-white/30 rounded-full border border-brown/30">

@@ -3,11 +3,12 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import "./datepicker.css";
 
 const PasoFecha = ({ selectedDate, setSelectedDate }) => {
   // Validar que selectedDate sea una fecha válida
   let validDate = new Date();
-  
+
   if (selectedDate instanceof Date && !isNaN(selectedDate)) {
     validDate = selectedDate;
   } else if (typeof selectedDate === "string" && selectedDate) {

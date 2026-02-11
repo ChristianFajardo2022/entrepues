@@ -4,6 +4,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { app } from "./config";
 
@@ -205,3 +206,60 @@ export const obtenerProductoPorId = async (
     throw error;
   }
 };
+
+/**
+ * Guardar productos seleccionados en una reserva existente
+ * @param {string} firestoreId - ID del documento de la reserva
+ * @param {Array} platosSeleccionados - Array con estructura: [{asistente, asistenteIndex, platos: [{id, nombre, precio, ...}], totalPlatos}]
+ * @returns {Promise<{success: boolean, message: string, total: number}>}
+ */
+export const guardarProductosEnReserva = async (
+  firestoreId,
+  platosSeleccionados
+) => {
+  try {
+    // Calcular el total sumando los precios de todos los platos
+    let totalMonto = 0;
+    let totalProductos = 0;
+
+    platosSeleccionados.forEach((asistenteData) => {
+      asistenteData.platos.forEach((plato) => {
+        totalMonto += parseFloat(plato.precio) || 0;
+        totalProductos += 1;
+      });
+    });
+
+    // Referencia al documento de la reserva
+    const reservaRef = doc(db, "reservas", firestoreId);
+
+    // Estructura de datos a guardar
+    const productosData = {
+      totalProductos: totalProductos,
+      total: totalMonto,
+      detalleAsistentes: platosSeleccionados,
+      fechaActualizacion: new Date().toISOString(),
+    };
+
+    // Actualizar el documento
+    await updateDoc(reservaRef, {
+      productos: productosData,
+    });
+
+    console.log(
+      `✅ Productos guardados exitosamente. Total: $${totalMonto.toLocaleString(
+        "es-CO"
+      )}`
+    );
+
+    return {
+      success: true,
+      message: "Productos guardados con éxito",
+      total: totalMonto,
+      totalProductos: totalProductos,
+    };
+  } catch (error) {
+    console.error("❌ Error al guardar productos en reserva:", error);
+    throw error;
+  }
+};
+

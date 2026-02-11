@@ -21,14 +21,14 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
 
   return (
     <>
-      <div className="flex-1 px-12 py-2 flex-col items-center [&>div]:grid [&>div]:grid-cols-5 [&>div]:gap-1 [&>div]:w-full [&>div]:justify-items-center [&>div]:items-center">
+      <div className="select-none flex-1 px-12 py-2 flex-col items-center [&>div]:grid [&>div]:grid-cols-6 [&>div]:gap-1 [&>div]:w-full [&>div]:justify-items-center [&>div]:items-center">
         <div>
           {canIncrementHour(hourStr) && (
             <Button
               type="just-icon"
               onClick={() => incrementarHora(hourStr, setHour)}
               Icon={ChevronUp}
-              customClass="col-start-1"
+              customClass="col-start-2"
             />
           )}
 
@@ -36,13 +36,13 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
             type="just-icon"
             onClick={() => incrementarMinuto(minuteStr, setMinute)}
             Icon={ChevronUp}
-            customClass="col-start-3"
+            customClass="col-start-4"
           />
         </div>
 
         <div>
           {obtenerHoraAnterior(hourStr) ? (
-            <div className="text-secondary/40 h-6 flex items-center justify-center flex-shrink-0 col-start-1 overflow-hidden">
+            <div className="h-12 opacity-40 flex items-center justify-center flex-shrink-0 col-start-2 overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.span
                   key={`prev-hour-${obtenerHoraAnterior(hourStr)}`}
@@ -59,7 +59,7 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
             <div />
           )}
 
-          <div className="text-secondary/40 h-6 flex items-center justify-center flex-shrink-0 col-start-3 overflow-hidden">
+          <div className="h-12 opacity-40 flex items-center justify-center flex-shrink-0 col-start-4 overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.span
                 key={`prev-minute-${minuteStr === "00" ? "30" : "00"}`}
@@ -74,8 +74,8 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
           </div>
         </div>
 
-        <div className="border-[1px] border-[#fff6ea30] bg-black/60 rounded-md">
-          <div className=" font-bold flex items-center justify-center col-start-1 overflow-hidden h-8">
+        <div className="border-[1px] border-dark/30 rounded-full">
+          <div className=" font-bold flex items-center justify-center col-start-2 overflow-hidden h-12">
             <AnimatePresence mode="wait">
               <motion.span
                 key={`current-hour-${hourStr}`}
@@ -88,9 +88,9 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
               </motion.span>
             </AnimatePresence>
           </div>
-          <span className="col-start-2">:</span>
+          <span className="col-start-3">:</span>
 
-          <div className=" font-bold flex items-center justify-center col-start-3 overflow-hidden h-8">
+          <div className="font-bold flex items-center justify-center col-start-4 overflow-hidden h-8">
             <AnimatePresence mode="wait">
               <motion.span
                 key={`current-minute-${minuteStr}`}
@@ -104,7 +104,7 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
             </AnimatePresence>
           </div>
 
-          <div className="ml-2 px-3 py-1 text-secondary font-semibold text-sm relative z-10 col-start-5 overflow-hidden">
+          <div className="ml-2 px-3 py-1 font-semibold text-sm relative z-10 col-start-5 overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.span
                 key={`ampm-${getAmPm(hourStr)}`}
@@ -121,7 +121,7 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
 
         <div>
           {obtenerProximaHora(hourStr) ? (
-            <div className="text-secondary/40 h-6 flex items-center justify-center flex-shrink-0 col-start-1 overflow-hidden">
+            <div className="h-12 opacity-40 flex items-center justify-center flex-shrink-0 col-start-2 overflow-hidden">
               <AnimatePresence mode="wait">
                 <motion.span
                   key={`next-hour-${obtenerProximaHora(hourStr)}`}
@@ -138,7 +138,7 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
             <div className="h-6"></div>
           )}
 
-          <div className="text-secondary/40 h-6 flex items-center justify-center flex-shrink-0 col-start-3 overflow-hidden">
+          <div className="h-12 opacity-40 flex items-center justify-center flex-shrink-0 col-start-4 overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.span
                 key={`next-minute-${minuteStr === "00" ? "30" : "00"}`}
@@ -159,7 +159,7 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
               type="just-icon"
               onClick={() => decrementarHora(hourStr, setHour)}
               Icon={ChevronDown}
-              customClass="col-start-1"
+              customClass="col-start-2"
             />
           ) : (
             <div />
@@ -169,7 +169,7 @@ export default function PasoHora({ hour, minute, setHour, setMinute }) {
             type="just-icon"
             onClick={() => decrementarMinuto(minuteStr, setMinute)}
             Icon={ChevronDown}
-            customClass="col-start-3"
+            customClass="col-start-4"
           />
         </div>
       </div>

@@ -137,9 +137,7 @@ export const ModalLayout = forwardRef(
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <div className="max-w-7xl w-full mx-auto flex justify-center items-center">
-                    {children}
-                  </div>
+                  {children}
                 </motion.div>
               </motion.div>
             </motion.div>

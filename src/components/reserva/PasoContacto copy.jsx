@@ -73,13 +73,9 @@ const PasoContacto = ({
     if (!value.trim()) {
       return "El WhatsApp es requerido";
     }
-    const onlyNumbers = value.replace(/\s/g, "");
-    if (onlyNumbers.length !== 10) {
-      return "Tu número debe contener 10 dígitos";
-    }
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(onlyNumbers)) {
-      return "El WhatsApp solo puede contener números";
+    if (!phoneRegex.test(value.replace(/\s/g, ""))) {
+      return "El WhatsApp debe tener 10 dígitos";
     }
     return "";
   };
@@ -107,56 +103,43 @@ const PasoContacto = ({
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  const handleWhatsappChange = (e) => {
-    const value = e.target.value;
-    // Solo permitir números, máximo 10 dígitos
-    const onlyNumbers = value.replace(/\D/g, "").slice(0, 10);
-    setWhatsapp(onlyNumbers);
-  };
-
   return (
     <div className="py-4">
+      Estás reservando una mesa para {adults} adulto{adults !== 1 ? "s" : ""}
+      {children > 0 && `, ${children} niño${children !== 1 ? "s" : ""}`}
+      {mascotas > 0 && ` y ${mascotas} mascota${mascotas !== 1 ? "s" : ""}`} el
+      día{" "}
+      {capitalizeFirst(
+        selectedDate.toLocaleDateString("es-CO", {
+          day: "numeric",
+          month: "long",
+        })
+      )}{" "}
+      a las {convertTo12Hour(hour)}:{minute} {getAmPm(hour)}.
       <div className="flex flex-col z-10 md:w-full gap-8 my-8">
-        <div className="flex flex-col w-full space-y-6">
-          {/* Nombre completo */}
-          <div className="w-full">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={() => handleBlur("name")}
-              className={`${styles.input} ${
-                touched.name && errors.name ? "border-red-500" : ""
-              } `}
-              placeholder="Nombre completo *"
-              required
-            />
-            {touched.name && errors.name && (
-              <span className="text-red-500 text-sm">{errors.name}</span>
-            )}
-          </div>
+        <p className="">¿A nombre de quien es la reserva?:</p>
 
-          {/* WhatsApp */}
-          <div className="w-full">
-            <input
-              type="tel"
-              value={whatsapp}
-              onChange={handleWhatsappChange}
-              onBlur={() => handleBlur("whatsapp")}
-              className={`${styles.input} ${
-                touched.whatsapp && errors.whatsapp ? "border-red-500" : ""
-              }`}
-              placeholder="WhatsApp *"
-              maxLength="10"
-              required
-            />
-            {touched.whatsapp && errors.whatsapp && (
-              <span className="text-red-500 text-sm">{errors.whatsapp}</span>
-            )}
-          </div>
+        {/* Nombre completo */}
+        <div className="flex flex-col w-full">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => handleBlur("name")}
+            className={`${styles.input} ${
+              touched.name && errors.name ? "border-red-500" : ""
+            }`}
+            placeholder="Nombre completo *"
+            required
+          />
+          {touched.name && errors.name && (
+            <span className="text-red-500 text-sm mt-2">{errors.name}</span>
+          )}
+        </div>
 
-          {/* Correo */}
-          <div className="w-full">
+        {/* Correo y Whatsapp */}
+        <div className="flex gap-6 w-full">
+          <div className="flex flex-col w-1/2">
             <input
               type="email"
               value={email}
@@ -166,10 +149,27 @@ const PasoContacto = ({
                 touched.email && errors.email ? "border-red-500" : ""
               }`}
               placeholder="Correo *"
-              required
             />
             {touched.email && errors.email && (
-              <span className="text-red-500 text-sm">{errors.email}</span>
+              <span className="text-red-500 text-sm mt-2">{errors.email}</span>
+            )}
+          </div>
+
+          <div className="flex flex-col w-1/2 ">
+            <input
+              type="tel"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+              onBlur={() => handleBlur("whatsapp")}
+              className={`${styles.input} ${
+                touched.whatsapp && errors.whatsapp ? "border-red-500" : ""
+              }`}
+              placeholder="WhatsApp *"
+            />
+            {touched.whatsapp && errors.whatsapp && (
+              <span className="text-red-500 text-sm mt-2">
+                {errors.whatsapp}
+              </span>
             )}
           </div>
         </div>
@@ -182,5 +182,5 @@ export default PasoContacto;
 
 const styles = {
   input:
-    "bg-white/20 border border-brown/20 rounded-full px-26 focus:outline-1 focus:outline-[#fff6ea50] py-3 text-center placeholder:/80 w-full",
+    "bg-transparent border-b border-[#fff6ea50] focus:outline-1 focus:outline-[#fff6ea50] p-4  placeholder:/80 w-full",
 };

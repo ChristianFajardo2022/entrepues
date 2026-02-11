@@ -2,9 +2,11 @@ export const Logo = ({ color = "white", size = "xl" }) => {
   const ColorTheme = () => {
     switch (color) {
       case "white":
-        return "fill-[#fff5e8]";
+        return "fill-secondary";
       case "brown":
-        return "fill-[#352821]";
+        return "fill-brown";
+      case "dark":
+        return "fill-dark";
       default:
         return "fill-white";
     }

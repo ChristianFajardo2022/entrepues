@@ -32,13 +32,38 @@ export const useReservaStore = create(
         hour: "09",
         minute: "00",
         adults: 1,
-        children: 0,
-        mascotas: 0,
+        children: 0, // Límite: adultos + niños no puede exceder 6
+        mascotas: 0, // Límite: máximo 4 mascotas
         name: "",
         email: "",
         whatsapp: "",
       },
       reservaResult: {},
+
+      // ===== DATOS DE SELECCIÓN DE PLATOS =====
+      platosSeleccionados: {}, // Estructura: { asistenteIndex: [platos] }
+      
+      updatePlatosSeleccionados: (datos) =>
+        set({
+          platosSeleccionados: datos,
+        }),
+
+      guardarPlatosSeleccionados: (firestoreId, platosData) => {
+        set((state) => ({
+          platosSeleccionados: {
+            firestoreId,
+            fecha: new Date().toISOString(),
+            platosSeleccionados: platosData,
+          },
+        }));
+      },
+
+      obtenerPlatosSeleccionados: () => get().platosSeleccionados,
+
+      resetPlatosSeleccionados: () =>
+        set({
+          platosSeleccionados: {},
+        }),
 
       setReservaResult: (data) =>
         set({
@@ -135,16 +160,44 @@ export const useReservaStore = create(
 
       // ===== ACCIONES DE DATOS =====
       updateReservaData: (data) =>
-        set((state) => ({
-          reservaData: { ...state.reservaData, ...data },
-        })),
+        set((state) => {
+          const newData = { ...state.reservaData, ...data };
+
+          // Validación: máximo 6 personas (adultos + niños)
+          const totalPersonas = (newData.adults || 0) + (newData.children || 0);
+          if (totalPersonas > 6) {
+            console.warn("⚠️ No se puede exceder 6 personas en total");
+            return state; // No actualizar si excede el límite
+          }
+
+          // Validación: máximo 4 mascotas
+          if ((newData.mascotas || 0) > 4) {
+            console.warn("⚠️ No se pueden agregar más de 4 mascotas");
+            return state; // No actualizar si excede el límite
+          }
+
+          return {
+            reservaData: newData,
+          };
+        }),
 
       /** Guarda el objeto completo en localStorage y en estado */
       guardarDatos: (payload) => {
         try {
-          set((state) => ({
+          // Validar límites antes de guardar
+          const totalPersonas = (payload.adults || 0) + (payload.children || 0);
+          if (totalPersonas > 6) {
+            console.warn("⚠️ No se puede exceder 6 personas en total");
+            return;
+          }
+          if ((payload.mascotas || 0) > 4) {
+            console.warn("⚠️ No se pueden agregar más de 4 mascotas");
+            return;
+          }
+
+          set({
             reservaData: payload,
-          }));
+          });
         } catch (error) {
           console.error("Error guardando datos", error);
         }
@@ -157,6 +210,7 @@ export const useReservaStore = create(
           completedSteps: [false, false, false, false],
           showResumen: false,
           showThankYou: false,
+          platosSeleccionados: {},
           reservaData: {
             selectedDate: new Date().toISOString(),
             hour: "09",

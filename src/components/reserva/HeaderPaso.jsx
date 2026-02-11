@@ -18,53 +18,24 @@ export default function HeaderPaso({
   const isDisabled = index > currentStep && !isCompleted;
 
   return (
-    <BackgroundCards
-      fullWidth="small"
-      rounded="small"
-      padding={false}
-      customClasses="px-4 py-2"
-    >
+    <div className="size-full text-dark relative">
       <button
         onClick={onClick}
         disabled={isDisabled}
-        className="flex items-center justify-between relative"
+        className={`size-full flex flex-col items-start justify-center ${
+          isExpanded ? "pl-16" : "font-bold pl-8 opacity-40"
+        } ${
+          isDisabled ? "!cursor-not-allowed" : "hover:opacity-100"
+        } relative font-light transition ease-in-out`}
       >
-        {/* Número del paso */}
-
         {/* Título y descripción */}
-        <div>
-          <h3 className="text-xl">{paso.titulo}</h3>
-          {content && (
-            <div className="mt-2 flex items-center text-secondary/50">
-              {content}
-            </div>
-          )}
-        </div>
+        {isExpanded && (
+          <span className="absolute left-0 h-2/3 w-1.5 rounded-full bg-brown" />
+        )}
+        <h3 className="text-xl">{paso.titulo}</h3>
 
-        {/* <p className=" text-sm mt-1">
-          {isCompleted ? capitalizeFirst(paso.descripcion) : ""}
-        </p> */}
-
-        {/* Indicador de estado */}
-        <div
-          className={`size-8 aspect-square border rounded-full flex justify-center items-center justify-self-end ${
-            isCompleted
-              ? "border-secondary/0"
-              : !isExpanded && !isCompleted
-              ? "border-secondary/0"
-              : "border-white"
-          }`}
-        >
-          {isCompleted ? (
-            <Check className="text-green-500" />
-          ) : (
-            <>
-              {" "}
-              <ArrowRight className="text-secondary" />{" "}
-            </>
-          )}
-        </div>
+        {content && <>{content}</>}
       </button>
-    </BackgroundCards>
+    </div>
   );
 }

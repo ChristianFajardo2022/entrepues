@@ -6,7 +6,7 @@ import useCartStore from "../../store/cartStore";
 import useMenuStore from "../../store/menuStore";
 
 import { ModalLayout } from "../layout/ModalLayout";
-import PasoFecha from "../reserva/PasoFecha";
+import PasoFecha from "../reserva/datepicker/PasoFecha";
 import PasoHora from "../reserva/PasoHoraMain";
 import PasoCantidad from "../reserva/PasoCantidad";
 import PasoContacto from "../reserva/PasoContacto";
@@ -24,9 +24,11 @@ import {
   ListChecks,
   Timer,
   User,
+  X,
 } from "lucide-react";
 import { p } from "framer-motion/client";
 import SliderVertical from "./slider/SliderVertical";
+import { Logo } from "../ui/Logo";
 
 /**
  * Modal de reserva con acordeón vertical (paso a paso)
@@ -80,7 +82,7 @@ export default function BookingModal() {
   // Configuración de pasos - 4 pasos separados
   const pasos = [
     {
-      titulo: "Elige una Fecha",
+      titulo: "Fecha",
       icon: Calendar,
       descripcion: completedSteps[0]
         ? selectedDate.toLocaleDateString("es-CO", {
@@ -98,7 +100,7 @@ export default function BookingModal() {
         : "",
     },
     {
-      titulo: "Personas",
+      titulo: "Visitantes",
       icon: User,
       descripcion: completedSteps[2]
         ? `${adults} adulto${adults !== 1 ? "s" : ""}${
@@ -111,7 +113,7 @@ export default function BookingModal() {
         : "",
     },
     {
-      titulo: "Datos de contacto",
+      titulo: "Contacto",
       icon: ListChecks,
       descripcion: completedSteps[3] ? name : "",
     },
@@ -122,20 +124,6 @@ export default function BookingModal() {
     updateReservaData({ [field]: value });
   };
 
-  const setSelectedDate = (date) => {
-    // Convertir Date a ISO string para almacenamiento
-    const isoString = date instanceof Date ? date.toISOString() : date;
-    updateReservaField("selectedDate", isoString);
-  };
-  const setHour = (hour) => updateReservaField("hour", hour);
-  const setMinute = (minute) => updateReservaField("minute", minute);
-  const setAdults = (adults) => updateReservaField("adults", adults);
-  const setChildren = (children) => updateReservaField("children", children);
-  const setMascotas = (mascotas) => updateReservaField("mascotas", mascotas);
-  const setName = (name) => updateReservaField("name", name);
-  const setEmail = (email) => updateReservaField("email", email);
-  const setWhatsapp = (whatsapp) => updateReservaField("whatsapp", whatsapp);
-
   // Confirmar paso actual y pasar al siguiente
   const confirmarPaso = () => {
     const newCompleted = [...completedSteps];
@@ -145,7 +133,6 @@ export default function BookingModal() {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Al completar el último paso, marcar resumen como mostrado
       markResumenAsShown();
     }
   };
@@ -154,36 +141,6 @@ export default function BookingModal() {
   const voltearPaso = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-    }
-  };
-
-  // Editar reserva (volver a pasos)
-  const handleEditarReserva = () => {
-    // Encontrar el último paso completado para volver a ese
-    const lastCompletedStep = completedSteps.reduce(
-      (lastIndex, completed, index) => {
-        return completed ? index : lastIndex;
-      },
-      0
-    );
-    editarReserva(lastCompletedStep);
-  };
-
-  // Confirmar la reserva
-  const handleConfirmarReserva = async () => {
-    if (!name.trim() || !email.trim() || !whatsapp.trim()) {
-      alert("Por favor completa todos los datos de contacto");
-      return;
-    }
-
-    // Enviar datos a Firestore
-    const result = await enviarDatos();
-
-    if (result.ok) {
-      //confirmarPaso();
-      showThankYouPage();
-    } else {
-      alert("Error al confirmar la reserva: " + result.error);
     }
   };
 
@@ -207,10 +164,17 @@ export default function BookingModal() {
         ref={scrollModalRef}
         activeModal={isBookingOpen}
         closeModal={closeBooking}
-        Title="Confirmando tu reserva..."
         close={false}
       >
-        <div className="w-full px-2 md:max-w-xl mx-auto select-none py-8">
+        <div className="size-full px-2 md:max-w-xl mx-auto select-none py-8 flex justify-center items-center flex-col gap-16">
+          <Logo color="dark" size="lg" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="inline-block"
+          >
+            <div className="w-12 h-12 border-4 border-transparent border-t-current border-r-current rounded-full" />
+          </motion.div>
           <p className="text-center">
             Por favor espera mientras confirmamos tu reserva.
           </p>
@@ -227,8 +191,8 @@ export default function BookingModal() {
         activeModal={isBookingOpen}
         closeModal={handleCloseThankYou}
         //Title="¡Reserva confirmada!"
-        header={true}
         close={false}
+        header={<HeaderReserva closeBooking={closeBooking} close={false} />}
       >
         <ThankYouPage
           onClose={handleCloseThankYou}
@@ -248,58 +212,82 @@ export default function BookingModal() {
       originBack={originOpen}
       close
       full
+      header={<HeaderReserva closeBooking={closeBooking} />}
     >
-      <div className="size-full flex">
-        <div className="w-1/2 h-full space-y-6 pr-42">
-          <h2 className="text-5xl font-bold">Realiza una reserva</h2>
-          <h3 className="text-secondary/80">
-            Te invitamos a realizar el proceso de reserva en unos simples pasos
-          </h3>
-          <AnimatePresence>
-            {pasos.map((paso, index) => {
-              const isExpanded = currentStep === index;
-              const isCompleted = completedSteps[index];
+      <div className="w-full h-full max-w-5xl mx-auto px-4 flex items-center justify-center">
+        <div className="w-full h-[40.2060625rem] flex items-center bg-white/20 rounded-xl gap-6 p-6 pt-12">
+          <div className="w-1/3 h-full flex flex-col justify-between">
+            <h2 className="pl-8 font-parkson mb-12">
+              <span className="!text-4xl">Realiza tu</span> <br />
+              <span className="!text-9xl leading-20">reserva</span>
+            </h2>
 
-              return (
-                <motion.div
-                  ref={(el) => (stepRefs.current[index] = el)}
-                  key={index}
-                  className=" text-secondary/80"
-                >
-                  {/* Header del paso */}
-                  <HeaderPaso
-                    index={index}
-                    paso={paso}
-                    content={
-                      <>
-                        {paso.descripcion === "" ? (
-                          <></>
-                        ) : (
-                          <>
-                            <paso.icon className="size-5" />
-                            <p className="ml-2">
-                              {paso.descripcion || "-- /--"}
-                            </p>
-                          </>
-                        )}
-                      </>
-                    }
-                    isExpanded={isExpanded}
-                    isCompleted={isCompleted}
-                    currentStep={currentStep}
-                    onClick={() => {
-                      if (isCompleted || index < currentStep) {
-                        setCurrentStep(index);
+            <AnimatePresence>
+              {pasos.map((paso, index) => {
+                const isExpanded = currentStep === index;
+                const isCompleted = completedSteps[index];
+
+                return (
+                  <motion.div
+                    ref={(el) => (stepRefs.current[index] = el)}
+                    key={index}
+                    className={`${
+                      index !== pasos.length - 1 ? "border-b" : ""
+                    } border-l border-dark/20 flex-1`}
+                  >
+                    {/* Header del paso */}
+                    <HeaderPaso
+                      index={index}
+                      paso={paso}
+                      content={
+                        <>
+                          {paso.descripcion === "" ? (
+                            <></>
+                          ) : (
+                            <>
+                              <p className="text-start !text-base">
+                                {paso.descripcion || "-- /--"}
+                              </p>
+                            </>
+                          )}
+                        </>
                       }
-                    }}
-                  />
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                      isExpanded={isExpanded}
+                      isCompleted={isCompleted}
+                      currentStep={currentStep}
+                      onClick={() => {
+                        if (isCompleted || index < currentStep) {
+                          setCurrentStep(index);
+                        }
+                      }}
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+          {/* Slider Vertical con Swiper */}
+          <div className="flex-1 h-full bg-[#faf7f1] rounded-lg overflow-hidden">
+            <SliderVertical />
+          </div>
         </div>
-        <SliderVertical />
       </div>
     </ModalLayout>
   );
 }
+
+const HeaderReserva = ({ closeBooking, close = true }) => {
+  return (
+    <div className="w-full flex justify-between items-center px-4 py-2 max-w-5xl mx-auto">
+      <div />
+      <Logo color="dark" size="md" />
+      {close ? (
+        <button onClick={closeBooking}>
+          <X />
+        </button>
+      ) : (
+        <div />
+      )}
+    </div>
+  );
+};
