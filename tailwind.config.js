@@ -8,9 +8,7 @@ export default {
         xs: "300px",
       },
       fontFamily: {
-        "danson-bold": ["DansonBold", "serif"],
-        "danson-regular": ["DansonRegular", "serif"],
-        "danson-semi": ["DansonSemiBold", "serif"],
+       "":""
       },
     },
   },

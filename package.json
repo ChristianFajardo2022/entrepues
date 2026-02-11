@@ -20,10 +20,10 @@
     "framer-motion": "^12.9.2",
     "gsap": "^3.13.0",
     "lottie-react": "^2.4.1",
-    "react": "^19.0.0",
+    "lucide-react": "^0.562.0",
     "react-datepicker": "^8.2.1",
-    "react-dom": "^19.0.0",
     "react-router-dom": "^7.4.0",
+    "swiper": "^12.0.3",
     "zustand": "^5.0.4"
   },
   "devDependencies": {
