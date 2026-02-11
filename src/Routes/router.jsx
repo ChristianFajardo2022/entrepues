@@ -4,10 +4,17 @@ import { BREAKPOINTS } from "../constants/routes";
 
 // Layout
 import MainLayout from "../components/layout/MainLayout";
+import AdminLayout from "../components/admin/AdminLayout";
 
 // Pages
 import Video360Page from "../pages/Video360Page";
 import NotFoundPage from "../pages/NotFoundPage";
+
+// Admin Pages
+import AdminPage from "../pages/admin/AdminPage";
+import AdminReservasPage from "../pages/admin/AdminReservasPage";
+import AdminConfigPage from "../pages/admin/AdminConfigPage";
+import AdminStoragePage from "../pages/admin/AdminStoragePage";
 
 // Components
 import { Home } from "../components/home/Home";
@@ -26,6 +33,14 @@ function AppRouter() {
 
           {/* Ruta de descubrenos - Video 360 */}
           <Route path="/descubrenos" element={<Video360Page />} />
+        </Route>
+
+        {/* Panel de Administración */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminPage />} />
+          <Route path="reservas" element={<AdminReservasPage />} />
+          <Route path="configuracion" element={<AdminConfigPage />} />
+          <Route path="storage" element={<AdminStoragePage />} />
         </Route>
 
         {/* Ruta 404 - Cualquier ruta no encontrada (sin Layout) */}
