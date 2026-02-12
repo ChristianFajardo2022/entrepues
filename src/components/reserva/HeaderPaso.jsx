@@ -22,8 +22,8 @@ export default function HeaderPaso({
       <button
         onClick={onClick}
         disabled={isDisabled}
-        className={`size-full flex flex-col items-start justify-center ${
-          isExpanded ? "pl-16" : "font-bold pl-8 opacity-40"
+        className={`size-full flex lg:flex-col flex-row lg:items-start items-center lg:justify-center justify-between ${
+          isExpanded ? "lg:pl-16 pl-4" : "font-bold lg:pl-8 pl-4 opacity-40"
         } ${
           isDisabled ? "!cursor-not-allowed" : "hover:opacity-100"
         } relative font-light transition ease-in-out`}

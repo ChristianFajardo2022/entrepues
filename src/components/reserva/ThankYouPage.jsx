@@ -22,7 +22,8 @@ export default function ThankYouPage({
   const numeroReserva = reservaResult?.["numero-de-reserva"] || "N/A";
   const firestoreId = reservaResult?.firestoreId || "N/A";
 
-  const asistentes = reservaResult?.adultos + reservaResult?.ninos || 0;
+  const asistentes =
+    (reservaResult?.adultos ?? 0) + (reservaResult?.ninos ?? 0);
   const detalleAsistentes = [];
 
   // Crear array de asistentes con sus nombres
@@ -41,7 +42,7 @@ export default function ThankYouPage({
 
   const handleConfirmarPlatos = (datosJSON) => {
     console.log("Datos de platos guardados:", datosJSON);
-    
+
     if (datosJSON.exitoso) {
       // Si se guardó exitosamente en Firestore, mostrar la pantalla de éxito
       setTotalGuardado(datosJSON.total);
@@ -69,9 +70,6 @@ export default function ThankYouPage({
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <h3 className="text-3xl font-semibold text-secondary mb-2">
-              ¡Éxito!
-            </h3>
             <p className="text-lg text-dark mb-6">
               Tus productos han sido guardados con éxito
             </p>

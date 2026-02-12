@@ -70,15 +70,22 @@ export const isValidTime = (timeStr) => {
  * @returns {boolean}
  */
 export const isValidGuestCount = (adults, children) => {
-  const adultsNum = Number(adults);
-  const childrenNum = Number(children);
+  // Convertir a números, null/undefined = 0
+  const adultsNum = adults !== null && adults !== undefined ? Number(adults) : 0;
+  const childrenNum = children !== null && children !== undefined ? Number(children) : 0;
   
-  if (!Number.isInteger(adultsNum) || !Number.isInteger(childrenNum)) {
+  // Verificar que sean números válidos (no NaN)
+  if (isNaN(adultsNum) || isNaN(childrenNum)) {
     return false;
   }
   
-  // Al menos 1 adulto, máximo 50 personas totales
-  return adultsNum >= 1 && adultsNum <= 50 && childrenNum >= 0 && childrenNum <= 50 && (adultsNum + childrenNum) <= 50;
+  // Ambos deben ser enteros no-negativos
+  if (!Number.isInteger(adultsNum) || !Number.isInteger(childrenNum) || adultsNum < 0 || childrenNum < 0) {
+    return false;
+  }
+  
+  // Al menos 1 adulto, máximo 6 personas totales (adultos + niños)
+  return adultsNum >= 1 && (adultsNum + childrenNum) >= 1 && (adultsNum + childrenNum) <= 6;
 };
 
 /**
@@ -125,11 +132,11 @@ export const validateReservaPayload = (payload) => {
   }
 
   // Validar cantidad de personas (nota: el objeto usa "ninos" para Firestore)
-  const adultos = payload.adultos || payload.adults;
-  const ninos = payload.ninos || payload.children || payload.niños;
+  let adultos = payload.adultos ?? payload.adults ?? 0;
+  let ninos = payload.ninos ?? payload.children ?? payload.niños ?? 0;
   
   if (!isValidGuestCount(adultos, ninos)) {
-    errors.push("Cantidad de adultos y niños inválida (mín 1 adulto, máx 50 personas totales)");
+    errors.push("Cantidad de adultos y niños inválida (mín 1 adulto, máx 6 personas totales)");
   }
 
   return {

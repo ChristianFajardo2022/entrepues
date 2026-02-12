@@ -214,12 +214,13 @@ export default function BookingModal() {
       full
       header={<HeaderReserva closeBooking={closeBooking} />}
     >
-      <div className="w-full h-full max-w-5xl mx-auto px-4 flex items-center justify-center">
-        <div className="w-full h-[40.2060625rem] flex items-center bg-white/20 rounded-xl gap-6 p-6 pt-12">
-          <div className="w-1/3 h-full flex flex-col justify-between">
-            <h2 className="pl-8 font-parkson mb-12">
-              <span className="!text-4xl">Realiza tu</span> <br />
-              <span className="!text-9xl leading-20">reserva</span>
+      <div className="w-full h-full max-w-5xl mx-auto px-2 md:px-4 flex items-center justify-center">
+        <div className="w-full lg:h-[40.2060625rem] h-full flex lg:flex-row flex-col items-stretch bg-white/20 rounded-xl lg:gap-6 gap-3 lg:p-6 lg:pt-12 p-3 md:py-4 overflow-hidden">
+          <div className="lg:w-1/3 w-full lg:h-full h-auto flex flex-col justify-start lg:justify-between overflow-y-auto lg:overflow-y-visible max-lg:gap-2">
+            <h2 className="lg:pl-8 font-parkson lg:mb-8 mb-4 flex-shrink-0 text-center">
+              <span className="lg:!text-4xl !text-5xl">Realiza tu</span>{" "}
+              <br className="max-lg:hidden" />
+              <span className=" lg:!text-9xl !text-5xl">reserva</span>
             </h2>
 
             <AnimatePresence>
@@ -232,8 +233,8 @@ export default function BookingModal() {
                     ref={(el) => (stepRefs.current[index] = el)}
                     key={index}
                     className={`${
-                      index !== pasos.length - 1 ? "border-b" : ""
-                    } border-l border-dark/20 flex-1`}
+                      index !== pasos.length - 1 ? "lg:border-b" : ""
+                    } lg:border-l border-dark/20 flex-shrink-0 lg:flex-1`}
                   >
                     {/* Header del paso */}
                     <HeaderPaso
@@ -245,7 +246,7 @@ export default function BookingModal() {
                             <></>
                           ) : (
                             <>
-                              <p className="text-start !text-base">
+                              <p className="text-start lg:!text-xl md:!text-base">
                                 {paso.descripcion || "-- /--"}
                               </p>
                             </>
@@ -267,7 +268,7 @@ export default function BookingModal() {
             </AnimatePresence>
           </div>
           {/* Slider Vertical con Swiper */}
-          <div className="flex-1 h-full bg-[#faf7f1] rounded-lg overflow-hidden">
+          <div className="flex-1 lg:h-full h-auto bg-[#faf7f1] rounded-lg overflow-hidden min-h-0">
             <SliderVertical />
           </div>
         </div>

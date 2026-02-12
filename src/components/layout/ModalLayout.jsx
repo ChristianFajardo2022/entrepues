@@ -132,7 +132,7 @@ export const ModalLayout = forwardRef(
 
                 <motion.div
                   ref={scrollRef}
-                  className="flex-1 w-full relative z-20 overflow-y-auto overflow-x-hidden pt-10"
+                  className="flex-1 w-full relative z-20 overflow-y-auto overflow-x-hidden lg:pt-10"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}

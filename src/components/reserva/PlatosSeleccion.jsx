@@ -176,6 +176,23 @@ export default function PlatosSeleccion({
   };
 
   const handleConfirmar = async () => {
+    // Validar que todos los asistentes tienen al menos un plato
+    const asistentesSinPlatos = [];
+    for (let i = 0; i < asistentes.length; i++) {
+      if (!platosSeleccionados[i] || platosSeleccionados[i].length === 0) {
+        asistentesSinPlatos.push(asistentes[i]);
+      }
+    }
+
+    // Si hay asistentes sin platos, mostrar alerta
+    if (asistentesSinPlatos.length > 0) {
+      const asistentesTexto = asistentesSinPlatos.join(", ");
+      alert(
+        `⚠️ Los siguientes asistentes no tienen platos seleccionados:\n\n${asistentesTexto}\n\nPor favor, agrega al menos un plato para cada asistente antes de continuar.`
+      );
+      return; // No continuar
+    }
+
     const datosJSON = generarJSON();
     console.log("Datos finales:", datosJSON);
 
@@ -300,7 +317,7 @@ export default function PlatosSeleccion({
                       onClick={() => setSubcategoriaActual(subcategoria)}
                       className={`px-3 py-1.5 rounded text-sm font-medium flex-shrink-0 transition-all ${
                         subcategoriaActual === subcategoria
-                          ? "bg-secondary text-white"
+                          ? "bg-dark/30 text-dark"
                           : "bg-dark/10 text-dark/60 hover:bg-dark/20"
                       }`}
                     >
