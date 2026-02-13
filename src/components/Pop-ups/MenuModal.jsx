@@ -334,7 +334,7 @@ const SectionOne = () => {
   return (
     <main className="size-full flex justify-center items-center relative">
       <div
-        className="relative w-full h-[46.9rem] bg-contain bg-center overflow-hidden flex items-center justify-center"
+        className="relative w-full lg:h-[46.9rem] h-96 bg-cover bg-no-repeat bg-center overflow-hidden flex items-center justify-center"
         style={{
           backgroundImage: "url('/imagenes/menu/background_menu.webp')",
         }}
@@ -393,7 +393,7 @@ const Sections = ({ invert = false, content }) => {
         return (
           <div
             className={`${content.width} h-auto bg-white flex ${
-              invert ? "flex-row-reverse" : ""
+              invert ? "lg:flex-row-reverse flex-col" : "lg:flex-row flex-col"
             } items-center`}
           >
             <motion.div
@@ -402,13 +402,13 @@ const Sections = ({ invert = false, content }) => {
                 visible: { opacity: 1, scale: 1 },
               }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="w-1/2 relative z-20 text-center text-dark"
+              className="w-full lg:w-1/2 relative z-20 text-center text-dark my-20"
             >
               <Textos title={content.title} parraf={content.description} />
             </motion.div>
 
             {/* Ejemplo con otro video/imagen usando el componente reutilizable */}
-            <div className="w-1/2">
+            <div className="w-full lg:w-1/2">
               <MediaDisplay
                 videoSrc={content.videoSrc}
                 imageSrc={content.imageSrc}

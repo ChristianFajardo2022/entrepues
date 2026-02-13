@@ -39,7 +39,7 @@ export const Title = ({
   const FontSize = () => {
     switch (headingLevel) {
       case "h1":
-        return "lg:!text-9xl lg:!leading-20 !text-5xl";
+        return "lg:!text-9xl lg:!leading-20 !text-6xl";
       case "h2":
         return "lg:!text-7xl lg:!leading-12 !text-5xl";
       case "h3":
@@ -52,7 +52,7 @@ export const Title = ({
   const FontSizeSubtitle = () => {
     switch (headingLevel) {
       case "h1":
-        return "lg:!text-5xl !text-4xl";
+        return "lg:!text-5xl !text-3xl";
       case "h2":
         return "lg:!text-5xl !text-4xl";
       case "h3":

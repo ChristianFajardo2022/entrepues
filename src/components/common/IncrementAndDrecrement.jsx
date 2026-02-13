@@ -7,24 +7,24 @@ export const IncremenAndDecrementComponent = ({
   decreaseQuantity,
 }) => {
   return (
-    <div className="flex items-center gap-2 rounded-lg p-1">
+    <div className="flex items-center gap-2 rounded-lg ">
       <Button
         type="button-thirty"
         Icon={Minus}
         iconSize="small"
         onClick={decreaseQuantity}
         props={{ "aria-label": "Disminuir cantidad" }}
-        customClass="opacity-40 hover:opacity-100 !px-4 !py-1 !rounded-md"
+        customClass="opacity-40 hover:opacity-100 !p-1 !rounded-md border border-dark/60"
       />
 
-      <span className="w-6 text-center font-semibold">{item}</span>
+      <span className="w-6 text-center">{item}</span>
       <Button
         type="button-thirty"
         Icon={Plus}
         iconSize="small"
         onClick={increaseQuantity}
         props={{ "aria-label": "Aumentar cantidad" }}
-        customClass="opacity-40 hover:opacity-100 !px-4 !py-1 !rounded-md"
+        customClass="opacity-40 hover:opacity-100 !p-1 !rounded-md border border-dark/60"
       />
     </div>
   );

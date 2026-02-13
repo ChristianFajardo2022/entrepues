@@ -42,29 +42,20 @@ export default function BookingModal() {
     currentStep,
     setCurrentStep,
     completedSteps,
-    setCompletedSteps,
     reservaData,
-    updateReservaData,
     originOpen,
-    showResumen,
     showThankYou,
-    markResumenAsShown,
-    editarReserva,
-    enviarDatos,
     isSending,
     reservaResult,
-    showThankYouPage,
     closeThankYou,
   } = useReservaStore();
-  const { cartItems, removeFromCart, openSidebarCart, closeSidebarCart } =
-    useCartStore();
+  const { openSidebarCart, closeSidebarCart } = useCartStore();
   const { openMenuWithContext } = useMenuStore();
   const isMobile = useIsMobile();
 
   // Estados derivados del store
   const stepRefs = useRef([]);
   const scrollModalRef = useRef(null);
-  const [isContactValid, setIsContactValid] = useState(false);
 
   // Estados derivados del store
   const selectedDate = reservaData.selectedDate
@@ -76,8 +67,6 @@ export default function BookingModal() {
   const children = reservaData.children;
   const mascotas = reservaData.mascotas;
   const name = reservaData.name;
-  const email = reservaData.email;
-  const whatsapp = reservaData.whatsapp;
 
   // Configuración de pasos - 4 pasos separados
   const pasos = [
@@ -119,31 +108,6 @@ export default function BookingModal() {
     },
   ];
 
-  // Funciones helper para actualizar datos
-  const updateReservaField = (field, value) => {
-    updateReservaData({ [field]: value });
-  };
-
-  // Confirmar paso actual y pasar al siguiente
-  const confirmarPaso = () => {
-    const newCompleted = [...completedSteps];
-    newCompleted[currentStep] = true;
-    setCompletedSteps(newCompleted);
-
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      markResumenAsShown();
-    }
-  };
-
-  // Volver al paso anterior
-  const voltearPaso = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
   // Abrir menú con contexto de reserva
   const handleAbrirMenu = () => {
     /* envia la activacion "true" a algun Estado para activar el sidebar del carrito */
@@ -158,123 +122,21 @@ export default function BookingModal() {
     closeThankYou();
   };
 
-  if (isSending) {
-    return (
-      <ModalLayout
-        ref={scrollModalRef}
-        activeModal={isBookingOpen}
-        closeModal={closeBooking}
-        close={false}
-      >
-        <div className="size-full px-2 md:max-w-xl mx-auto select-none py-8 flex justify-center items-center flex-col gap-16">
-          <Logo color="dark" size="lg" />
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="inline-block"
-          >
-            <div className="w-12 h-12 border-4 border-transparent border-t-current border-r-current rounded-full" />
-          </motion.div>
-          <p className="text-center">
-            Por favor espera mientras confirmamos tu reserva.
-          </p>
-        </div>
-      </ModalLayout>
-    );
-  }
-
-  if (showThankYou) {
-    // Si mostrar Thank You Page
-    return (
-      <ModalLayout
-        ref={scrollModalRef}
-        activeModal={isBookingOpen}
-        closeModal={handleCloseThankYou}
-        //Title="¡Reserva confirmada!"
-        close={false}
-        header={<HeaderReserva closeBooking={closeBooking} close={false} />}
-      >
-        <ThankYouPage
-          onClose={handleCloseThankYou}
-          reservaResult={reservaResult}
-          isMobile={isMobile}
-          handleAbrirMenu={handleAbrirMenu}
-        />
-      </ModalLayout>
-    );
-  }
-
+  // Si mostrar Thank You Page
   return (
     <ModalLayout
       ref={scrollModalRef}
       activeModal={isBookingOpen}
-      closeModal={closeBooking}
-      originBack={originOpen}
-      close
-      full
-      header={<HeaderReserva closeBooking={closeBooking} />}
+      closeModal={handleCloseThankYou}
+      close={false}
+      header={<HeaderReserva closeBooking={closeBooking} close={false} />}
     >
-      <div className="w-full h-full max-w-5xl mx-auto px-2 md:px-4 flex items-center justify-center">
-        <div className="w-full lg:h-[40.2060625rem] h-full flex lg:flex-row flex-col items-stretch bg-white/20 rounded-xl lg:gap-6 gap-3 lg:p-6 p-3 md:py-4 overflow-hidden">
-          <div className="lg:w-1/3 w-full lg:h-full h-auto flex flex-col justify-start lg:justify-between overflow-y-auto lg:overflow-y-visible max-lg:gap-2">
-            <h2 className="lg:pl-8 font-parkson lg:mb-8 mb-4 flex-shrink-0 lg:text-start text-center">
-              <span className="lg:!text-4xl !text-5xl">Realiza tu</span>{" "}
-              <br className="max-lg:hidden" />
-              <span className=" lg:!text-9xl lg:!leading-20 !text-5xl">
-                reserva
-              </span>
-            </h2>
-
-            <AnimatePresence>
-              {pasos.map((paso, index) => {
-                const isExpanded = currentStep === index;
-                const isCompleted = completedSteps[index];
-
-                return (
-                  <motion.div
-                    ref={(el) => (stepRefs.current[index] = el)}
-                    key={index}
-                    className={`${
-                      index !== pasos.length - 1 ? "lg:border-b" : ""
-                    } lg:border-l border-dark/20 flex-shrink-0 lg:flex-1`}
-                  >
-                    {/* Header del paso */}
-                    <HeaderPaso
-                      index={index}
-                      paso={paso}
-                      content={
-                        <>
-                          {paso.descripcion === "" ? (
-                            <></>
-                          ) : (
-                            <>
-                              <p className="text-start lg:!text-xl md:!text-base">
-                                {paso.descripcion || "-- /--"}
-                              </p>
-                            </>
-                          )}
-                        </>
-                      }
-                      isExpanded={isExpanded}
-                      isCompleted={isCompleted}
-                      currentStep={currentStep}
-                      onClick={() => {
-                        if (isCompleted || index < currentStep) {
-                          setCurrentStep(index);
-                        }
-                      }}
-                    />
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
-          {/* Slider Vertical con Swiper */}
-          <div className="flex-1 lg:h-full h-auto bg-[#faf7f1] rounded-lg overflow-hidden min-h-0">
-            <SliderVertical />
-          </div>
-        </div>
-      </div>
+      <ThankYouPage
+        onClose={handleCloseThankYou}
+        reservaResult={reservaResult}
+        isMobile={isMobile}
+        handleAbrirMenu={handleAbrirMenu}
+      />
     </ModalLayout>
   );
 }

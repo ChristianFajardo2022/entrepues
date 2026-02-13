@@ -8,22 +8,15 @@ import useReservaStore from "../../store/reservaStore";
 /**
  * Página de agradecimiento después de confirmar la reserva
  */
-export default function ThankYouPage({
-  onClose,
-  reservaResult,
-  isMobile,
-  handleAbrirMenu,
-}) {
-  const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(false);
+export default function ThankYouPage({ onClose, reservaResult }) {
+  const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(true);
+  /* const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(false); */
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [totalGuardado, setTotalGuardado] = useState(0);
-  const { guardarPlatosSeleccionados } = useReservaStore();
 
   const numeroReserva = reservaResult?.["numero-de-reserva"] || "N/A";
   const firestoreId = reservaResult?.firestoreId || "N/A";
 
-  const asistentes =
-    (reservaResult?.adultos ?? 0) + (reservaResult?.ninos ?? 0);
   const detalleAsistentes = [];
 
   // Crear array de asistentes con sus nombres
@@ -102,7 +95,7 @@ export default function ThankYouPage({
   if (mostrarSeleccionPlatos) {
     return (
       <div className="size-full mx-auto flex justify-center items-center">
-        <div className="p-8 md:max-w-6xl bg-white/20 rounded-lg w-full h-full flex flex-col">
+        <div className="p-8 md:max-w-7xl w-full h-full flex flex-col">
           <PlatosSeleccion
             asistentes={detalleAsistentes}
             firestoreId={firestoreId}

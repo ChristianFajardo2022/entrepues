@@ -1,8 +1,63 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "../ui/Button";
 import { capitalizeFirst } from "../../constants/firsLetterUppercase";
-import { obtenerTodasLasCategorias, guardarProductosEnReserva } from "../../firebase/actions";
+import {
+  obtenerTodasLasCategorias,
+  guardarProductosEnReserva,
+} from "../../firebase/actions";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import "../Pop-ups/slider/styleVertical.css";
+import { Check, ChevronLeft, Trash } from "lucide-react";
+import { IncremenAndDecrementComponent } from "../common/IncrementAndDrecrement";
+
+// ===========================
+// FUNCIONES UTILITARIAS
+// ===========================
+
+/**
+ * Normalizar nombres para comparación
+ */
+const normalize = (s = "") =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+/**
+ * Generar JSON con los datos de la reserva
+ */
+const generarJSON = (firestoreId, platosSeleccionados, asistentes) => {
+  return {
+    firestoreId,
+    fecha: new Date().toISOString(),
+    platosSeleccionados: Object.entries(platosSeleccionados).map(
+      ([asistenteIndex, platos]) => ({
+        asistente: asistentes[asistenteIndex],
+        asistenteIndex: parseInt(asistenteIndex),
+        platos: platos.map((p) => ({
+          id: p.originalId || p.id, // Usar el ID original para Firestore
+          nombre: p.nombre,
+          precio: p.precio,
+          cantidad: p.cantidad,
+          categoria: p.categoria,
+          subcategoria: p.subcategoria,
+          subtotal: p.precio * p.cantidad,
+        })),
+        totalPlatos: platos.reduce((sum, p) => sum + p.cantidad, 0),
+        totalPrecio: platos.reduce((sum, p) => sum + p.precio * p.cantidad, 0),
+      })
+    ),
+  };
+};
+
+// ===========================
+// COMPONENTE PRINCIPAL
+// ===========================
 
 /**
  * Componente para la selección de platos por asistente
@@ -13,6 +68,9 @@ export default function PlatosSeleccion({
   onConfirmar,
   onVolver,
 }) {
+  // ===========================
+  // ESTADOS
+  // ===========================
   const [asistenteActual, setAsistenteActual] = useState(0);
   const [platosSeleccionados, setPlatosSeleccionados] = useState({});
   const [categoriaActual, setCategoriActual] = useState("desayunos");
@@ -20,14 +78,11 @@ export default function PlatosSeleccion({
   const [categoriesData, setCategoriesData] = useState({});
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
+  const swiperRef = useRef(null);
 
-  // Normalizar nombres para comparación
-  const normalize = (s = "") =>
-    s
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
+  // ===========================
+  // EFECTOS Y MEMOS
+  // ===========================
 
   // Inicializar estructura de asistentes
   useEffect(() => {
@@ -70,52 +125,70 @@ export default function PlatosSeleccion({
     );
   }, [categoriesData]);
 
-  // Obtener subcategorías de la categoría seleccionada
-  const subcategorias = useMemo(() => {
+  // ===========================
+  // FUNCIONES DE UTILIDAD DEL COMPONENTE
+  // ===========================
+
+  // Obtener productos por categoría específica
+  const getProductosPorCategoria = (categoria) => {
     const catKey = Object.keys(categoriesData).find(
-      (key) => normalize(key) === normalize(categoriaActual)
+      (key) => normalize(key) === normalize(categoria)
     );
+
     if (!catKey) return [];
-    return Object.keys(categoriesData[catKey]?.subcategorias || {});
-  }, [categoriaActual, categoriesData]);
 
-  // Resetear subcategoría cuando cambie la categoría
-  useEffect(() => {
-    setSubcategoriaActual(null);
-  }, [categoriaActual]);
+    const subcategoriesData = categoriesData[catKey]?.subcategorias || {};
+    const todosLosProductos = [];
 
-  // Establecer la primera subcategoría como activa cuando cambien las subcategorías
-  useEffect(() => {
-    if (subcategorias.length > 0 && !subcategoriaActual) {
-      setSubcategoriaActual(subcategorias[0]);
+    // Iterar sobre todas las subcategorías para obtener todos los productos
+    Object.entries(subcategoriesData).forEach(([subcategoria, data]) => {
+      const productos = data?.productos || [];
+
+      productos.forEach((plato, index) => {
+        todosLosProductos.push({
+          id: `${categoria}__${subcategoria}__${plato.id}__${index}`,
+          originalId: plato.id,
+          nombre: plato.nombre,
+          descripcion: plato.descripcion || "",
+          precio: parseFloat(String(plato.precio).replace(/\D/g, "")),
+          categoria: categoria,
+          subcategoria: subcategoria,
+          img: plato.img,
+        });
+      });
+    });
+
+    return todosLosProductos;
+  };
+
+  const esPlatoSeleccionado = (platoId) => {
+    return (platosSeleccionados[asistenteActual] || []).some(
+      (p) => p.id === platoId
+    );
+  };
+
+  // ===========================
+  // MANEJADORES DE EVENTOS
+  // ===========================
+
+  // Manejar cambio de categoría y slider
+  const handleCategoriaChange = (categoria) => {
+    const categoriaIndex = categorias.indexOf(categoria);
+    setCategoriActual(categoria);
+
+    // Cambiar el slide del swiper
+    if (swiperRef.current && categoriaIndex >= 0) {
+      swiperRef.current.swiper.slideTo(categoriaIndex);
     }
-  }, [subcategorias, subcategoriaActual]);
+  };
 
-  // Obtener productos de la subcategoría activa
-  const platosActuales = useMemo(() => {
-    if (!subcategoriaActual) return [];
-
-    const catKey = Object.keys(categoriesData).find(
-      (key) => normalize(key) === normalize(categoriaActual)
-    );
-
-    if (!catKey) return [];
-
-    const subcatigoriesData = categoriesData[catKey]?.subcategorias || {};
-    const productsData = subcatigoriesData[subcategoriaActual]?.productos || [];
-
-    // Agregar ID único a cada producto
-    return productsData.map((plato, index) => ({
-      id: `${categoriaActual}__${subcategoriaActual}__${plato.id}__${index}`,
-      originalId: plato.id,
-      nombre: plato.nombre,
-      descripcion: plato.descripcion || "",
-      precio: parseFloat(String(plato.precio).replace(/\D/g, "")),
-      categoria: categoriaActual,
-      subcategoria: subcategoriaActual,
-      img: plato.img,
-    }));
-  }, [categoriaActual, subcategoriaActual, categoriesData]);
+  // Manejar cambio de slide
+  const handleSlideChange = (swiper) => {
+    const categoriaSeleccionada = categorias[swiper.activeIndex];
+    if (categoriaSeleccionada && categoriaSeleccionada !== categoriaActual) {
+      setCategoriActual(categoriaSeleccionada);
+    }
+  };
 
   const handleSeleccionarPlato = (plato) => {
     setPlatosSeleccionados((prev) => {
@@ -128,18 +201,48 @@ export default function PlatosSeleccion({
           [asistenteActual]: actual.filter((p) => p.id !== plato.id),
         };
       } else {
+        // Agregar plato con cantidad por defecto de 1
+        const platoConCantidad = {
+          ...plato,
+          cantidad: 1,
+        };
         return {
           ...prev,
-          [asistenteActual]: [...actual, plato],
+          [asistenteActual]: [...actual, platoConCantidad],
         };
       }
     });
   };
 
-  const esPlatoSeleccionado = (platoId) => {
-    return (platosSeleccionados[asistenteActual] || []).some(
-      (p) => p.id === platoId
-    );
+  const handleIncrementarCantidad = (platoId) => {
+    setPlatosSeleccionados((prev) => {
+      const actual = prev[asistenteActual] || [];
+      const actualizado = actual.map((p) =>
+        p.id === platoId ? { ...p, cantidad: p.cantidad + 1 } : p
+      );
+      return {
+        ...prev,
+        [asistenteActual]: actualizado,
+      };
+    });
+  };
+
+  const handleDisminuirCantidad = (platoId) => {
+    setPlatosSeleccionados((prev) => {
+      const actual = prev[asistenteActual] || [];
+      const actualizado = actual.map((p) => {
+        if (p.id === platoId) {
+          const nuevaCantidad = p.cantidad - 1;
+          // Si la cantidad llega a 0, mantener el plato pero con cantidad 1
+          return { ...p, cantidad: nuevaCantidad < 1 ? 1 : nuevaCantidad };
+        }
+        return p;
+      });
+      return {
+        ...prev,
+        [asistenteActual]: actualizado,
+      };
+    });
   };
 
   const irAlSiguiente = () => {
@@ -152,27 +255,6 @@ export default function PlatosSeleccion({
     if (asistenteActual > 0) {
       setAsistenteActual(asistenteActual - 1);
     }
-  };
-
-  const generarJSON = () => {
-    return {
-      firestoreId,
-      fecha: new Date().toISOString(),
-      platosSeleccionados: Object.entries(platosSeleccionados).map(
-        ([asistenteIndex, platos]) => ({
-          asistente: asistentes[asistenteIndex],
-          asistenteIndex: parseInt(asistenteIndex),
-          platos: platos.map((p) => ({
-            id: p.originalId || p.id, // Usar el ID original para Firestore
-            nombre: p.nombre,
-            precio: p.precio,
-            categoria: p.categoria,
-            subcategoria: p.subcategoria,
-          })),
-          totalPlatos: platos.length,
-        })
-      ),
-    };
   };
 
   const handleConfirmar = async () => {
@@ -193,7 +275,7 @@ export default function PlatosSeleccion({
       return; // No continuar
     }
 
-    const datosJSON = generarJSON();
+    const datosJSON = generarJSON(firestoreId, platosSeleccionados, asistentes);
     console.log("Datos finales:", datosJSON);
 
     setGuardando(true);
@@ -222,11 +304,51 @@ export default function PlatosSeleccion({
     }
   };
 
+  // ===========================
+  // VARIABLES DERIVADAS
+  // ===========================
   const asistenteNombre = asistentes[asistenteActual];
   const platosDelAsistente = platosSeleccionados[asistenteActual] || [];
 
+  // Calcular totales para el asistente actual
+  const totalCantidad = platosDelAsistente.reduce(
+    (sum, plato) => sum + plato.cantidad,
+    0
+  );
+  const totalPrecio = platosDelAsistente.reduce(
+    (sum, plato) => sum + plato.precio * plato.cantidad,
+    0
+  );
+
+  // Calcular totales generales de toda la reserva
+  const totalGeneralCantidad = Object.values(platosSeleccionados).reduce(
+    (total, platos) =>
+      total + platos.reduce((sum, plato) => sum + plato.cantidad, 0),
+    0
+  );
+  const totalGeneralPrecio = Object.values(platosSeleccionados).reduce(
+    (total, platos) =>
+      total +
+      platos.reduce((sum, plato) => sum + plato.precio * plato.cantidad, 0),
+    0
+  );
+
+  // ===========================
+  // RENDER
+  // ===========================
+
   return (
     <div className="w-full h-full flex flex-col">
+      <button
+        type="button"
+        onClick={onVolver}
+        disabled={guardando}
+        className="text-dark flex items-center gap-2 mb-4 transition-opacity opacity-80 hover:opacity-100"
+      >
+        <ChevronLeft className="text-dark transition-colors" />
+        Volver
+      </button>
+
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <motion.div
@@ -244,199 +366,290 @@ export default function PlatosSeleccion({
           transition={{ duration: 0.3 }}
           className="flex-1 overflow-hidden flex flex-col"
         >
-          {/* Header */}
-          <div className="text-center mb-6">
-            <h3 className="text-2xl font-semibold text-dark mb-2">
-              Selecciona platos para {asistenteNombre}
-            </h3>
-            <p className="text-sm text-dark/60">
-              Asistente {asistenteActual + 1} de {asistentes.length}
-            </p>
-          </div>
+          {/* Contenido principal: 2 columnas */}
+          <div className="flex items-center gap-8 flex-1 overflow-hidden">
+            {/* Columna izquierda: Asistente Actual */}
+            <div className="h-full flex flex-col bg-white/20 w-1/3 p-6 rounded-lg">
+              <h4 className="font-semibold mb-4 text-dark">
+                Selecciona los platos por persona
+              </h4>
 
-        {/* Contenido principal: 2 columnas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
-          {/* Columna izquierda: Asistentes */}
-          <div className="flex flex-col">
-            <h4 className="font-semibold mb-4 text-dark">Asistentes</h4>
-            <div className="space-y-2 overflow-y-auto flex-1">
-              {asistentes.map((asistente, index) => (
-                <motion.button
-                  key={index}
-                  onClick={() => setAsistenteActual(index)}
-                  className={`p-3 rounded-lg text-left transition-all w-full ${
-                    asistenteActual === index
-                      ? "bg-secondary text-dark shadow-lg"
-                      : "bg-dark/10 hover:bg-dark/20 text-dark"
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{asistente}</span>
-                    <span className="text-xs bg-dark/20 px-2 py-1 rounded">
-                      {(platosSeleccionados[index] || []).length}
-                    </span>
+              {/* Asistente Actual */}
+              <div className="text-dark rounded-lg mb-4 flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex flex-col overflow-hidden">
+                  <div className="font-medium text-lg my-4">
+                    <span className="block">{asistenteNombre}</span>
                   </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
 
-          {/* Columna derecha: Platos por categorías */}
-          <div className="flex flex-col overflow-hidden">
-            {/* Categorías */}
-            {categorias.length > 0 && (
-              <div className="mb-4">
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {categorias.map((categoria) => (
-                    <Button
-                      key={categoria}
-                      type="button-thirty"
-                      onClick={() => setCategoriActual(categoria)}
-                      title={capitalizeFirst(categoria.replace(/_/g, " "))}
-                      fontSize="base"
-                      customClass={`flex-shrink-0 ${
-                        categoriaActual === categoria
-                          ? "opacity-100"
-                          : "opacity-40 hover:opacity-80"
-                      }`}
-                    />
-                  ))}
+                  {/* Lista de platos con scroll */}
+                  <div className="flex-1 min-h-0">
+                    <div className="h-full overflow-y-auto max-h-[60vh]">
+                      {platosDelAsistente.length > 0 ? (
+                        <div className="space-y-4 pr-2">
+                          {platosDelAsistente.map((plato) => (
+                            <motion.div
+                              key={plato.id}
+                              className={`bg-secondary flex items-center gap-3 px-3 py-4 rounded-lg transition-all cursor-pointer relative`}
+                            >
+                              <picture className="w-auto h-14 inline-block">
+                                <img
+                                  className="size-full object-cover inline-block rounded-lg"
+                                  src={plato.img}
+                                  alt={plato.nombre}
+                                />
+                              </picture>
+                              <div className="flex-1 space-y-2">
+                                <div className="w-full flex items-center justify-between">
+                                  <p className="max-w-52 font-medium text-dark text-start line-clamp-1">
+                                    {plato.nombre}
+                                  </p>
+                                  <span
+                                    onClick={() =>
+                                      handleSeleccionarPlato(plato)
+                                    }
+                                    className="size-8 flex items-center justify-end rounded-full"
+                                  >
+                                    <Trash className="text-dark/20 hover:text-red-500" />
+                                  </span>
+                                </div>
+
+                                <div className="w-full flex items-center justify-between">
+                                  <div className="flex flex-col">
+                                    <p className="text-xs font-semibold text-dark text-start">
+                                      ${plato.precio.toLocaleString("es-CO")}{" "}
+                                      c/u
+                                    </p>
+                                  </div>
+
+                                  <IncremenAndDecrementComponent
+                                    item={plato.cantidad}
+                                    increaseQuantity={() =>
+                                      handleIncrementarCantidad(plato.id)
+                                    }
+                                    decreaseQuantity={() =>
+                                      handleDisminuirCantidad(plato.id)
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-dark/60 italic">
+                          Sin platos seleccionados
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Subcategorías */}
-            {subcategorias.length > 0 && (
-              <div className="mb-4">
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {subcategorias.map((subcategoria) => (
-                    <button
-                      key={subcategoria}
-                      onClick={() => setSubcategoriaActual(subcategoria)}
-                      className={`px-3 py-1.5 rounded text-sm font-medium flex-shrink-0 transition-all ${
-                        subcategoriaActual === subcategoria
-                          ? "bg-dark/30 text-dark"
-                          : "bg-dark/10 text-dark/60 hover:bg-dark/20"
-                      }`}
-                    >
-                      {capitalizeFirst(subcategoria.replace(/_/g, " "))}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+              {/* Navegación entre asistentes - Fija en la parte inferior */}
+              <div className="flex flex-col gap-2 mt-4 flex-shrink-0">
+                {totalCantidad > 0 && (
+                  <div className="flex flex-col w-full">
+                    <div className="flex justify-between items-center">
+                      <p className="text-dark/40">Productos seleccionados</p>
+                      <span>{totalCantidad}</span>
+                    </div>
+                    <div className="w-full flex justify-between items-center">
+                      <p className="font-bold">Subtotal total</p>
+                      <p>
+                        <span>{totalPrecio.toLocaleString("es-CO")}</span>
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-            {/* Platos de la categoría */}
-            <div className="space-y-2 overflow-y-auto flex-1">
-              {platosActuales.length > 0 ? (
-                platosActuales.map((plato) => (
-                  <motion.div
-                    key={plato.id}
-                    className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${
-                      esPlatoSeleccionado(plato.id)
-                        ? "border-secondary bg-secondary/10"
-                        : "border-dark/20 bg-dark/5 hover:bg-dark/10"
-                    }`}
-                    onClick={() => handleSeleccionarPlato(plato)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        checked={esPlatoSeleccionado(plato.id)}
-                        onChange={() => handleSeleccionarPlato(plato)}
-                        className="mt-1 cursor-pointer accent-secondary"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-dark">
-                          {plato.nombre}
-                        </p>
-                        <p className="text-xs text-dark/60 line-clamp-1">
-                          {plato.descripcion}
-                        </p>
-                        <p className="text-xs font-semibold text-dark mt-1">
-                          ${plato.precio.toLocaleString("es-CO")}
+                {/* Resumen Total de la Reserva */}
+                {asistenteActual === asistentes.length - 1 &&
+                  totalGeneralCantidad > 0 && (
+                    <div className="flex flex-col w-full mt-4 pt-4 border-t border-dark/20">
+                      <div className="w-full flex justify-between items-center">
+                        <p className="font-bold">Total a pagar</p>
+                        <p className="font-bold">
+                          <span>
+                            ${totalGeneralPrecio.toLocaleString("es-CO")}
+                          </span>
                         </p>
                       </div>
                     </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="text-center text-dark/60 py-8">
-                  <p className="text-sm">No hay platos en esta categoría</p>
+                  )}
+
+                <div className="flex justify-between items-center gap-4 mt-4">
+                  {asistenteActual !== 0 && (
+                    <Button
+                      onClick={irAlAnterior}
+                      title="Anterior"
+                      type="button-dark"
+                      customClass={`flex-1 py-1 px-3 ${
+                        asistenteActual === 0
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={asistenteActual === 0}
+                      gap-4
+                    />
+                  )}
+
+                  {asistenteActual === asistentes.length - 1 ? (
+                    <Button
+                      onClick={handleConfirmar}
+                      title={guardando ? "Guardando..." : "Confirmar pedido"}
+                      type="button-dark"
+                      customClass="flex-1 py-1 px-3"
+                      disabled={guardando}
+                    />
+                  ) : (
+                    <Button
+                      onClick={irAlSiguiente}
+                      title="Siguiente"
+                      width=""
+                      type="button-dark"
+                      customClass={`flex-1 py-1 px-3 ${
+                        asistenteActual === asistentes.length - 1
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={asistenteActual === asistentes.length - 1}
+                    />
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Resumen del asistente */}
-        <div className="mt-6 p-4 bg-dark/10 rounded-lg border border-dark/20">
-          <p className="text-sm font-semibold text-dark mb-2">
-            Platos seleccionados para {asistenteNombre}:
-          </p>
-          {platosDelAsistente.length > 0 ? (
-            <div className="space-y-1">
-              {platosDelAsistente.map((plato) => (
-                <p key={plato.id} className="text-xs text-dark/60">
-                  • {plato.nombre}
-                </p>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-dark/60 italic">
-              Sin platos seleccionados
-            </p>
-          )}
-        </div>
-
-        {/* Botones de navegación */}
-        <div className="flex gap-3 mt-6 justify-between">
-          <div className="flex gap-2">
-            <Button
-              onClick={irAlAnterior}
-              title="Anterior"
-              type="button-dark"
-              customClass={`py-1.5 px-4 ${
-                asistenteActual === 0 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={asistenteActual === 0}
-            />
-            <Button
-              onClick={irAlSiguiente}
-              title="Siguiente"
-              type="button-dark"
-              customClass={`py-1.5 px-4 ${
-                asistenteActual === asistentes.length - 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-              disabled={asistenteActual === asistentes.length - 1}
+            {/* Columna derecha: Platos por categorías */}
+            <MenuSelected
+              categorias={categorias}
+              categoriaActual={categoriaActual}
+              handleCategoriaChange={handleCategoriaChange}
+              swiperRef={swiperRef}
+              handleSlideChange={handleSlideChange}
+              getProductosPorCategoria={getProductosPorCategoria}
+              esPlatoSeleccionado={esPlatoSeleccionado}
+              handleSeleccionarPlato={handleSeleccionarPlato}
             />
           </div>
-
-          <div className="flex gap-2">
-            <Button
-              onClick={onVolver}
-              title="Volver"
-              type="button-dark"
-              customClass="py-1.5 px-4"
-              disabled={guardando}
-            />
-            <Button
-              onClick={handleConfirmar}
-              title={guardando ? "Guardando..." : "Confirmar pedido"}
-              type="button-dark"
-              customClass="py-1.5 px-4"
-              disabled={guardando}
-            />
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
       )}
     </div>
   );
 }
+
+// ===========================
+// COMPONENTE MENU SELECTED
+// ===========================
+
+/**
+ * Componente para mostrar el menú de categorías y platos
+ */
+const MenuSelected = ({
+  categorias,
+  categoriaActual,
+  handleCategoriaChange,
+  swiperRef,
+  handleSlideChange,
+  getProductosPorCategoria,
+  esPlatoSeleccionado,
+  handleSeleccionarPlato,
+}) => {
+  return (
+    <div className="flex-1 flex h-full overflow-hidden bg-white/20 p-6 rounded-lg">
+      {/* Nombres de Categorías */}
+      {categorias.length > 0 && (
+        <div className="flex-1 h-full mb-4">
+          <div className="font-parkson h-full flex flex-col justify-between overflow-x-auto">
+            <h2 className="text-7xl mb-4">Menú</h2>
+            {categorias.map((categoria, index) => (
+              <div
+                className={`pl-3 size-full relative border-l-1 flex items-center justify-start border-dark/20 ${
+                  index !== categorias.length - 1 ? "border-b-1" : ""
+                }`}
+                key={categoria}
+              >
+                {categoriaActual === categoria && (
+                  <span className="absolute left-0 h-2/5 w-1 rounded-full bg-brown" />
+                )}
+                <Button
+                  key={categoria}
+                  type="button-thirty"
+                  onClick={() => handleCategoriaChange(categoria)}
+                  title={capitalizeFirst(categoria.replace(/_/g, " "))}
+                  customClass={`!text-2xl text-start ${
+                    categoriaActual === categoria
+                      ? "opacity-100"
+                      : "opacity-40 hover:opacity-80"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Platos de la categoría con Slider Vertical */}
+      <div className="w-[32.6rem] h-full space-y-2 overflow-y-auto bg-secondary pl-4 rounded-lg">
+        <Swiper
+          ref={swiperRef}
+          direction="vertical"
+          pagination={false}
+          modules={[]}
+          className="mySwiper w-full h-full"
+          onSlideChange={handleSlideChange}
+          initialSlide={categorias.indexOf(categoriaActual)}
+          allowTouchMove={true}
+          simulateTouch={true}
+          keyboard={false}
+        >
+          {categorias.map((categoria) => {
+            const productosCategoria = getProductosPorCategoria(categoria);
+
+            return (
+              <SwiperSlide key={categoria} className="h-full">
+                <div className="w-full h-full overflow-y-auto space-y-2 pr-2">
+                  {productosCategoria.length > 0 ? (
+                    productosCategoria.map((plato) => (
+                      <motion.div
+                        key={plato.id}
+                        className={`flex items-center gap-2 p-3 rounded-lg transition-all cursor-pointer hover:bg-dark/10 relative`}
+                        onClick={() => handleSeleccionarPlato(plato)}
+                      >
+                        <picture className="w-16 h-auto aspect-square inline-block">
+                          <img
+                            className="size-full object-cover inline-block"
+                            src={plato.img}
+                            alt={plato.nombre}
+                          />
+                        </picture>
+                        <div className="flex flex-col items-start justify-center ">
+                          {esPlatoSeleccionado(plato.id) && (
+                            <span className="bg-green-100 size-8 flex items-center justify-center rounded-full absolute right-4 top-1/2 -translate-y-1/2">
+                              <Check className="text-green-400" />
+                            </span>
+                          )}
+
+                          <p className="font-medium text-sm text-dark text-start line-clamp-1 max-w-86">
+                            {plato.nombre}
+                          </p>
+
+                          <p className="text-xs font-semibold text-dark mt-1 text-start">
+                            ${plato.precio.toLocaleString("es-CO")}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="text-center text-dark/60 py-8">
+                      <p className="text-sm">No hay platos en esta categoría</p>
+                    </div>
+                  )}
+                </div>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+      </div>
+    </div>
+  );
+};
