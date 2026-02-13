@@ -23,10 +23,7 @@ import { capitalizeFirst } from "../../constants/firsLetterUppercase";
 import useReservaStore from "../../store/reservaStore";
 import { CardItems } from "../carrito/cardItems";
 import { CardsProducts } from "../menu/CardsProducts";
-import { Title } from "../ui/Title";
-import { IconoSeparador } from "../ui/IconoSeparador";
-import { MediaDisplay } from "../ui/MediaDisplay";
-import { s, title } from "framer-motion/client";
+ 
 
 /**
  * Modal del menú con integración de Firebase
@@ -259,51 +256,6 @@ export default function MenuModal() {
     };
   }, [activeProducts, isMenuOpen]);
 
-  const content = [
-    {
-      type: "column",
-      title: "La bandeja paisa",
-      description: "más rica del país",
-      videoSrc: "/video/menu/frijoles vertical.mp4",
-      imageSrc: "/imagenes/menu/bandeja-paisa.webp",
-      width: "w-full",
-    },
-    {
-      type: "row",
-      title: "El ajiaco",
-      description: "más rico del país",
-      videoSrc: "/video/menu/ajiaco.mp4",
-      imageSrc: "/imagenes/menu/ajiaco.webp",
-      width: "w-full",
-      invert: false,
-    },
-    {
-      type: "row",
-      title: "El tamal",
-      description: "más rico del país",
-      videoSrc: "/video/menu/Tamal.mp4",
-      imageSrc: "/imagenes/menu/tamal.webp",
-      invert: true,
-      width: "w-full",
-    },
-
-    {
-      type: "column",
-      title: "Fritanga",
-      description: "",
-      videoSrc: "",
-      imageSrc: "/imagenes/menu/fritanga.webp",
-      width: "lg:w-[38%] w-full lg:max-h-[46rem] ",
-    },
-    {
-      type: "column",
-      title: "Sancocho",
-      description: "",
-      videoSrc: "",
-      imageSrc: "/imagenes/menu/sancocho.webp",
-      width: "lg:flex-1 w-full lg:max-h-[46rem] ",
-    },
-  ];
   return (
     <>
       <ModalLayout
@@ -316,163 +268,113 @@ export default function MenuModal() {
         close={true}
         BackModal={handleBack}
       >
-        <div className="w-full flex justify-center items-center gap-12 flex-col">
-          <SectionOne />
-          <div className="max-w-6xl flex justify-center items-center flex-wrap gap-12 pb-12">
-            <SectionTwo />
-            {content.map((section, index) => (
-              <Sections key={index} content={section} invert={section.invert} />
-            ))}
+        <div className="w-full max-w-4xl h-full flex flex-col mx-auto">
+          <div className="w-full mx-auto">
+            {/* Versión grid para desktop + scroll responsive */}
+            <div className="flex gap-4 items-center bg-white/30 rounded-full border border-brown/30">
+              <div className="py-2 lg:grid lg:grid-cols-5 lg:gap-4 flex gap-4 lg:w-full w-max lg:justify-items-center lg:h-auto h-full items-center">
+                {orderedCategories.map((category, inx) => (
+                  <Button
+                    type="button-thirty"
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    title={capitalizeFirst(category.replace(/_/g, " "))}
+                    width="ajustado"
+                    customClass={`${
+                      normalize(selectedCategory) === normalize(category)
+                        ? "active opacity-100"
+                        : "opacity-50 hover:opacity-70"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
+          {loading ? (
+            <MenuSkeleton />
+          ) : (
+            <>
+              {/* SECCIÓN 2: Subcategorías */}
+              {activeSubcategories.length > 1 ||
+              (activeSubcategories.length === 1 &&
+                activeSubcategories[0] !== selectedCategory) ? (
+                <div className="flex-1 mt-14">
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {activeSubcategories.map((subcat) => (
+                      <Button
+                        type="button-thirty"
+                        key={subcat}
+                        onClick={() => setSelectedSubcategory(subcat)}
+                        title={capitalizeFirst(subcat.replace(/_/g, " "))}
+                        fontSize="base"
+                        customClass={`flex-shrink-0 px-2 ${
+                          selectedSubcategory === subcat
+                            ? "opacity-100"
+                            : "opacity-40 hover:opacity-80"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {/* SECCIÓN 3: Productos */}
+              <div className={`flex-1 mt-14 pb-10`}>
+                <div className="size-full">
+                  {activeProducts.length > 0 && (
+                    <div ref={containerRef} className="w-full flex gap-6">
+                      <CardsProducts
+                        isSidebarCartOpen={isSidebarCartOpen}
+                        handleOpenPopup={handleOpenPopup}
+                        selectedCategory={selectedCategory}
+                        handleAddToCart={handleAddToCart}
+                        isProductInCart={isProductInCart}
+                        activeProducts={activeProducts}
+                        BuyProcess={BuyProcess}
+                      />
+
+                      <AnimatePresence>
+                        {isSidebarCartOpen > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: "auto" }}
+                            exit={{ opacity: 0, width: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="h-full flex-1 sticky top-0 p-4 bg-[#141414] rounded-3xl self-start"
+                          >
+                            <CardItems footer={true} size="large" />
+                            <Button
+                              type="button-primary"
+                              onClick={CompletarReserva}
+                              title="Completar reserva"
+                              Icon={ConciergeBell}
+                              width="full"
+                              customClass="mt-4"
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </ModalLayout>
+
+      {/* Popup de producto */}
+      <AnimatePresence>
+        {popupOpen && (
+          <ProductPopup
+            open={popupOpen}
+            onClose={handleClosePopup}
+            producto={selectedProduct}
+            onAdd={handleProceedToCheckout}
+            isSidebarCartOpen={isSidebarCartOpen}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
-
-const SectionOne = () => {
-  return (
-    <main className="size-full flex justify-center items-center relative">
-      <div
-        className="relative w-full h-[46.9rem] bg-contain bg-center overflow-hidden flex items-center justify-center"
-        style={{
-          backgroundImage: "url('/imagenes/menu/background_menu.webp')",
-        }}
-      >
-        <div className="w-360 h-5/6 absolute top-1/2 left-1/2 -translate-1/2 inset-0 bg-radial from-black/80 z-10 blur-xl rounded-full" />
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, scale: 0.85 },
-            visible: { opacity: 1, scale: 1 },
-          }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full relative z-20 text-center scale-120"
-        >
-          <Title
-            headContent={"La casa de la cocina"}
-            content={"Más rica del país"}
-            theme="light"
-            headingLevel="h1"
-          />
-          <IconoSeparador theme="light" />
-        </motion.div>
-      </div>
-    </main>
-  );
-};
-
-const SectionTwo = () => {
-  return (
-    <div className="w-full h-[26.9rem] flex justify-center items-center">
-      <div className="w-full bg-contain bg-center overflow-hidden flex items-center justify-center">
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, scale: 0.85 },
-            visible: { opacity: 1, scale: 1 },
-          }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full relative z-20 text-center text-dark"
-        >
-          <Textos
-            title={"los favoritos de la casa"}
-            parraf={"De esos que uno no olvida y siempre vuelve a pedir"}
-          />
-
-          <span className="block mb-12" />
-          <IconoSeparador />
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
-const Sections = ({ invert = false, content }) => {
-  const direction = () => {
-    switch (content.type) {
-      case "row":
-        return (
-          <div
-            className={`${content.width} h-auto bg-white flex ${
-              invert ? "flex-row-reverse" : ""
-            } items-center`}
-          >
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, scale: 0.85 },
-                visible: { opacity: 1, scale: 1 },
-              }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="w-1/2 relative z-20 text-center text-dark"
-            >
-              <Textos title={content.title} parraf={content.description} />
-            </motion.div>
-
-            {/* Ejemplo con otro video/imagen usando el componente reutilizable */}
-            <div className="w-1/2">
-              <MediaDisplay
-                videoSrc={content.videoSrc}
-                imageSrc={content.imageSrc}
-                alt={content.title}
-                className="w-full h-auto object-cover"
-                autoPlay={true}
-                muted={false}
-                animated={true}
-                animationVariants={{
-                  hidden: { opacity: 0, x: 20 },
-                  visible: { opacity: 1, x: 0 },
-                }}
-              />
-            </div>
-          </div>
-        );
-      case "column":
-        return (
-          <div
-            className={`${content.width} h-full flex flex-col justify-between bg-white`}
-          >
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, scale: 0.85 },
-                visible: { opacity: 1, scale: 1 },
-              }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="w-full relative z-20 text-center text-dark my-20"
-            >
-              <Textos
-                title={content.title}
-                parraf={content.description !== "" ? content.description : null}
-              />
-            </motion.div>
-
-            {/* Usando el componente reutilizable MediaDisplay */}
-            <div className="flex-1 overflow-hidden">
-              <MediaDisplay
-                videoSrc={content.videoSrc !== "" ? content.videoSrc : null}
-                imageSrc={content.imageSrc !== "" ? content.imageSrc : null}
-                alt={content.title}
-                className="w-full h-full object-cover"
-                autoPlay={true}
-                controls={false}
-                muted={true}
-                loop={true}
-                animated={true}
-              />
-            </div>
-          </div>
-        );
-    }
-  };
-
-  return <>{direction()}</>;
-};
-
-const Textos = ({ title, parraf }) => {
-  return (
-    <>
-      <h2 className="font-parkson lg:!text-8xl lg:!leading-20 !text-6xl">
-        {title}
-      </h2>
-      {parraf && <p>{parraf}</p>}
-    </>
-  );
-};

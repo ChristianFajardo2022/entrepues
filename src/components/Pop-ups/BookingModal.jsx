@@ -215,12 +215,14 @@ export default function BookingModal() {
       header={<HeaderReserva closeBooking={closeBooking} />}
     >
       <div className="w-full h-full max-w-5xl mx-auto px-2 md:px-4 flex items-center justify-center">
-        <div className="w-full lg:h-[40.2060625rem] h-full flex lg:flex-row flex-col items-stretch bg-white/20 rounded-xl lg:gap-6 gap-3 lg:p-6 lg:pt-12 p-3 md:py-4 overflow-hidden">
+        <div className="w-full lg:h-[40.2060625rem] h-full flex lg:flex-row flex-col items-stretch bg-white/20 rounded-xl lg:gap-6 gap-3 lg:p-6 p-3 md:py-4 overflow-hidden">
           <div className="lg:w-1/3 w-full lg:h-full h-auto flex flex-col justify-start lg:justify-between overflow-y-auto lg:overflow-y-visible max-lg:gap-2">
-            <h2 className="lg:pl-8 font-parkson lg:mb-8 mb-4 flex-shrink-0 text-center">
+            <h2 className="lg:pl-8 font-parkson lg:mb-8 mb-4 flex-shrink-0 lg:text-start text-center">
               <span className="lg:!text-4xl !text-5xl">Realiza tu</span>{" "}
               <br className="max-lg:hidden" />
-              <span className=" lg:!text-9xl !text-5xl">reserva</span>
+              <span className=" lg:!text-9xl lg:!leading-20 !text-5xl">
+                reserva
+              </span>
             </h2>
 
             <AnimatePresence>

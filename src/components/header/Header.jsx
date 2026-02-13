@@ -5,6 +5,7 @@ import { Handbag } from "lucide-react";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
 import { useModalState } from "../../hooks/useModalState";
 import { useObserverVisibility } from "../../hooks/useObserverVisibility";
+import { useLoaderContext } from "../../context/LoaderContext";
 import useCartStore from "../../store/cartStore";
 import { Button } from "../ui/Button";
 import { handleOpenCart, handleCloseCart } from "../../logic/modalNavigation";
@@ -16,6 +17,7 @@ export const Header = ({ loading }) => {
   const { cartItems, isCartOpen, closeCart } = useCartStore();
   const isAnyModalOpen = useModalState();
   const isSectionTwoVisible = useObserverVisibility(".hide-logo-section");
+  const { loadingComplete } = useLoaderContext();
 
   // Cerrar con ESC
   useEscapeKey(() => {
@@ -34,6 +36,11 @@ export const Header = ({ loading }) => {
     }
   }, [menuOpen, isCartOpen]);
 
+  // Calcular delay basado en si el loader ha completado
+  const getAnimationDelay = () => {
+    return loadingComplete ? 1 : 2;
+  };
+
   return (
     <>
       <AnimatePresence mode="wait">
@@ -41,7 +48,7 @@ export const Header = ({ loading }) => {
           <motion.header
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: getAnimationDelay() }}
             className={`w-full h-auto fixed z-1001 top-0 left-0 text-secondary flex flex-col items-center justify-between`}
           >
             <div className="mx-auto max-w-7xl w-full md:px-0 h-22 grid grid-cols-3 items-center gap-4">

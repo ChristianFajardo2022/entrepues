@@ -89,14 +89,14 @@ export const ModalLayout = forwardRef(
 
               {/* Header de Titulo y botones de atras y cerrar y contenido */}
 
-              <motion.div className="absolute z-10 top-0 left-0 w-full h-full pt-6 flex flex-col">
+              <motion.div className="absolute z-10 top-0 left-0 w-full h-full flex flex-col">
                 <>
                   {/* Header */}
                   {header ? (
                     <>{header}</>
                   ) : (
                     <motion.div
-                      className={`z-10 pb-4 relative grid grid-cols-3 items-center gap-4 w-full max-w-7xl mx-auto flex-shrink-0`}
+                      className={`z-10 relative grid grid-cols-3 items-center gap-4 w-full max-w-7xl mx-auto flex-shrink-0 py-4`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.15 }}
@@ -111,7 +111,7 @@ export const ModalLayout = forwardRef(
                         <div className="w-10" />
                       )}
                       <motion.h2
-                        className="tracking-[0.3rem] text-8xl font-parkson text-center"
+                        className="tracking-[0.3rem] pb-2 text-7xl font-parkson text-center"
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ delay: 0.2 }}
@@ -132,7 +132,7 @@ export const ModalLayout = forwardRef(
 
                 <motion.div
                   ref={scrollRef}
-                  className="flex-1 w-full relative z-20 overflow-y-auto overflow-x-hidden lg:pt-10"
+                  className="flex-1 w-full relative z-20 overflow-y-auto overflow-x-hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
