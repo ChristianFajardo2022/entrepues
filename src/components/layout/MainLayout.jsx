@@ -30,12 +30,6 @@ export default function MainLayout() {
 
         {/* Modal del menú - Controlado por estado global */}
         <MenuModal />
-
-        {/* Modal del carrito - Controlado por estado global */}
-        <CartModalWrapper />
-
-        {/* Modal de reserva - Controlado por estado global */}
-        <BookingModal />
       </div>
     </LoaderProvider>
   );

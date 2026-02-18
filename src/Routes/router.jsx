@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useIsMobile } from "../hooks/useIsMobile";
-import { BREAKPOINTS } from "../constants/routes";
 
 // Layout
 import MainLayout from "../components/layout/MainLayout";
 import AdminLayout from "../components/admin/AdminLayout";
+import CheckoutLayout from "../components/layout/CheckoutLayout";
 
 // Pages
 import Video360Page from "../pages/Video360Page";
@@ -18,6 +17,10 @@ import AdminStoragePage from "../pages/admin/AdminStoragePage";
 
 // Components
 import { Home } from "../components/home/Home";
+import { Menu } from "../pages/Menu";
+import { Reservar } from "../pages/Reservar";
+import { Checkout } from "../pages/Checkout";
+import { CheckoutSucces } from "../pages/CheckoutSucces";
 /**
  * Configuración centralizada de rutas de la aplicación
  * Define todas las rutas, sus componentes y lógica de renderizado
@@ -33,6 +36,16 @@ function AppRouter() {
 
           {/* Ruta de descubrenos - Video 360 */}
           <Route path="/descubrenos" element={<Video360Page />} />
+        </Route>
+        <Route path="/menu" element={<Menu />} />
+        {/* Logica de reserva y checkout */}
+
+        <Route path="/reservar" element={<Reservar />} />
+
+        <Route element={<CheckoutLayout />}>
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/success" element={<CheckoutSucces />} />
+          <Route path="/checkout/cancel" element={<Checkout />} />
         </Route>
 
         {/* Panel de Administración */}

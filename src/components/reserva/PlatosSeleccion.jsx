@@ -13,6 +13,8 @@ import "swiper/css/pagination";
 import "../Pop-ups/slider/styleVertical.css";
 import { Check, ChevronLeft, Trash } from "lucide-react";
 import { IncremenAndDecrementComponent } from "../common/IncrementAndDrecrement";
+import { useNavigate } from "react-router-dom";
+import useReservaStore from "../../store/reservaStore";
 
 // ===========================
 // FUNCIONES UTILITARIAS
@@ -79,19 +81,47 @@ export default function PlatosSeleccion({
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const swiperRef = useRef(null);
+  const hydratedRef = useRef(false);
+  const checkoutTempIdRef = useRef(null);
+  const navigate = useNavigate();
+  const {
+    reservaData,
+    setReservaResult,
+    closeBooking,
+    showMenuSelected,
+    updatePlatosSeleccionados,
+    prepararDatosCheckout,
+  } = useReservaStore();
+
+  const asistentesLista = useMemo(() => {
+    if (Array.isArray(asistentes)) return asistentes;
+
+    if (asistentes && typeof asistentes === "object") {
+      if (Array.isArray(asistentes.asistentes)) {
+        return asistentes.asistentes;
+      }
+
+      const adultosCount = Number(asistentes.adultos || 0);
+      const ninosCount = Number(asistentes.ninos || 0);
+
+      const asistentesAdultos = Array.from(
+        { length: adultosCount },
+        (_, i) => `Adulto ${i + 1}`
+      );
+      const asistentesNinos = Array.from(
+        { length: ninosCount },
+        (_, i) => `Niño ${i + 1}`
+      );
+
+      return [...asistentesAdultos, ...asistentesNinos];
+    }
+
+    return [];
+  }, [asistentes]);
 
   // ===========================
   // EFECTOS Y MEMOS
   // ===========================
-
-  // Inicializar estructura de asistentes
-  useEffect(() => {
-    const inicial = {};
-    asistentes.forEach((asistente, index) => {
-      inicial[index] = [];
-    });
-    setPlatosSeleccionados(inicial);
-  }, [asistentes]);
 
   // Cargar datos de Firebase
   useEffect(() => {
@@ -124,6 +154,133 @@ export default function PlatosSeleccion({
       )
     );
   }, [categoriesData]);
+
+  const productosIndexados = useMemo(() => {
+    const index = {
+      byOriginalId: {},
+      byCompositeId: {},
+      byNombre: {},
+    };
+
+    Object.entries(categoriesData || {}).forEach(([catKey, catValue]) => {
+      const subcategorias = catValue?.subcategorias || {};
+
+      Object.entries(subcategorias).forEach(([subcategoria, subData]) => {
+        const productos = subData?.productos || [];
+
+        productos.forEach((plato, idx) => {
+          const normalizedCat = normalize(catKey).replace(/\s+/g, "_");
+          const compositeId = `${normalizedCat}__${subcategoria}__${plato.id}__${idx}`;
+          const productoNormalizado = {
+            id: compositeId,
+            originalId: plato.id,
+            nombre: plato.nombre,
+            descripcion: plato.descripcion || "",
+            precio: parseFloat(String(plato.precio).replace(/\D/g, "")),
+            categoria: normalizedCat,
+            subcategoria,
+            img: plato.img,
+          };
+
+          index.byOriginalId[String(plato.id)] = productoNormalizado;
+          index.byCompositeId[compositeId] = productoNormalizado;
+          index.byNombre[normalize(plato.nombre)] = productoNormalizado;
+        });
+      });
+    });
+
+    return index;
+  }, [categoriesData]);
+
+  // Inicializar / rehidratar desde localStorage cuando ya hay catálogo y asistentes
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (!asistentesLista.length || !Object.keys(categoriesData || {}).length)
+      return;
+
+    const inicial = {};
+    asistentesLista.forEach((_, index) => {
+      inicial[index] = [];
+    });
+
+    try {
+      const raw = localStorage.getItem("checkout:reserva:temp");
+      if (!raw) {
+        setPlatosSeleccionados(inicial);
+        setAsistenteActual(0);
+        hydratedRef.current = true;
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      checkoutTempIdRef.current = parsed?.id || null;
+      const guardados = Array.isArray(parsed?.platosSeleccionados)
+        ? parsed.platosSeleccionados
+        : [];
+
+      const restaurados = { ...inicial };
+      const indicesConDatos = [];
+
+      guardados.forEach((asistenteData) => {
+        const idx = Number(asistenteData?.asistenteIndex);
+        if (Number.isNaN(idx) || idx < 0 || idx >= asistentesLista.length)
+          return;
+
+        const platos = Array.isArray(asistenteData?.platos)
+          ? asistenteData.platos
+          : [];
+
+        const platosNormalizados = platos
+          .map((platoGuardado, i) => {
+            const fromOriginal =
+              productosIndexados.byOriginalId[String(platoGuardado?.id)];
+            const fromComposite =
+              productosIndexados.byCompositeId[platoGuardado?.id];
+            const fromNombre =
+              productosIndexados.byNombre[normalize(platoGuardado?.nombre)];
+
+            const base = fromOriginal || fromComposite || fromNombre;
+
+            return {
+              id:
+                base?.id ||
+                `restored__${idx}__${String(platoGuardado?.id || i)}__${i}`,
+              originalId: base?.originalId || platoGuardado?.id,
+              nombre: base?.nombre || platoGuardado?.nombre || "Plato",
+              descripcion: base?.descripcion || "",
+              precio: Number(base?.precio ?? platoGuardado?.precio ?? 0),
+              categoria: base?.categoria || platoGuardado?.categoria || "",
+              subcategoria:
+                base?.subcategoria || platoGuardado?.subcategoria || "",
+              img: base?.img || platoGuardado?.img || "",
+              cantidad: Math.max(1, Number(platoGuardado?.cantidad || 1)),
+            };
+          })
+          .filter((plato) => plato.nombre && !Number.isNaN(plato.precio));
+
+        restaurados[idx] = platosNormalizados;
+        if (platosNormalizados.length > 0) {
+          indicesConDatos.push(idx);
+        }
+      });
+
+      setPlatosSeleccionados(restaurados);
+
+      if (indicesConDatos.length > 0) {
+        const ordenados = [...new Set(indicesConDatos)].sort((a, b) => a - b);
+        const ultimoConDatos = ordenados[ordenados.length - 1];
+        setAsistenteActual(Math.max(0, ultimoConDatos));
+      } else {
+        setAsistenteActual(0);
+      }
+    } catch (error) {
+      console.error("Error rehidratando platos desde localStorage:", error);
+      setPlatosSeleccionados(inicial);
+      setAsistenteActual(0);
+    } finally {
+      hydratedRef.current = true;
+    }
+  }, [asistentesLista, categoriesData, productosIndexados]);
 
   // ===========================
   // FUNCIONES DE UTILIDAD DEL COMPONENTE
@@ -246,7 +403,7 @@ export default function PlatosSeleccion({
   };
 
   const irAlSiguiente = () => {
-    if (asistenteActual < asistentes.length - 1) {
+    if (asistenteActual < asistentesLista.length - 1) {
       setAsistenteActual(asistenteActual + 1);
     }
   };
@@ -260,9 +417,9 @@ export default function PlatosSeleccion({
   const handleConfirmar = async () => {
     // Validar que todos los asistentes tienen al menos un plato
     const asistentesSinPlatos = [];
-    for (let i = 0; i < asistentes.length; i++) {
+    for (let i = 0; i < asistentesLista.length; i++) {
       if (!platosSeleccionados[i] || platosSeleccionados[i].length === 0) {
-        asistentesSinPlatos.push(asistentes[i]);
+        asistentesSinPlatos.push(asistentesLista[i]);
       }
     }
 
@@ -275,30 +432,31 @@ export default function PlatosSeleccion({
       return; // No continuar
     }
 
-    const datosJSON = generarJSON(firestoreId, platosSeleccionados, asistentes);
-    console.log("Datos finales:", datosJSON);
-
     setGuardando(true);
     try {
-      // Llamar a la función para guardar en Firestore
-      const resultado = await guardarProductosEnReserva(
-        firestoreId,
-        datosJSON.platosSeleccionados
+      // Generar datos JSON para los platos seleccionados
+      const datosJSON = generarJSON(
+        firestoreId || checkoutTempIdRef.current || `temp-${Date.now()}`,
+        platosSeleccionados,
+        asistentesLista
       );
 
-      // Si fue exitoso, llamar a onConfirmar con los datos
-      if (onConfirmar) {
-        onConfirmar({
-          ...datosJSON,
-          exitoso: true,
-          total: resultado.total,
-          totalProductos: resultado.totalProductos,
-        });
+      // Usar la función del store para preparar datos de checkout
+      const resultado = prepararDatosCheckout(datosJSON.platosSeleccionados);
+
+      if (!resultado.ok) {
+        throw new Error(resultado.error || "No se pudieron preparar los datos");
       }
+
+      console.log("✅ Datos guardados temporalmente para checkout");
+
+      closeBooking(); // Cerrar modal de reserva
+
+      // Redirigir al checkout
+      navigate("/checkout");
     } catch (error) {
-      console.error("Error al guardar productos:", error);
-      // Aquí podrías mostrar un toast o mensaje de error
-      alert("Error al guardar los productos. Por favor, intenta de nuevo.");
+      console.error("Error al preparar datos para checkout:", error);
+      alert("Error al preparar la reserva. Por favor, intenta de nuevo.");
     } finally {
       setGuardando(false);
     }
@@ -307,7 +465,7 @@ export default function PlatosSeleccion({
   // ===========================
   // VARIABLES DERIVADAS
   // ===========================
-  const asistenteNombre = asistentes[asistenteActual];
+
   const platosDelAsistente = platosSeleccionados[asistenteActual] || [];
 
   // Calcular totales para el asistente actual
@@ -339,24 +497,15 @@ export default function PlatosSeleccion({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <button
-        type="button"
-        onClick={onVolver}
-        disabled={guardando}
-        className="text-dark flex items-center gap-2 mb-4 transition-opacity opacity-80 hover:opacity-100"
-      >
-        <ChevronLeft className="text-dark transition-colors" />
-        Volver
-      </button>
-
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <motion.div
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-center text-dark"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="size-full text-center bg-dark/10 animate-pulse text-dark flex items-center justify-center rounded-lg flex-col"
           >
-            <p className="text-lg font-semibold">Cargando platos...</p>
+            <span />
           </motion.div>
         </div>
       ) : (
@@ -367,20 +516,17 @@ export default function PlatosSeleccion({
           className="flex-1 overflow-hidden flex flex-col"
         >
           {/* Contenido principal: 2 columnas */}
-          <div className="flex items-center gap-8 flex-1 overflow-hidden">
+          <div className="flex items-center flex-1 gap-6 overflow-hidden">
             {/* Columna izquierda: Asistente Actual */}
-            <div className="h-full flex flex-col bg-white/20 w-1/3 p-6 rounded-lg">
-              <h4 className="font-semibold mb-4 text-dark">
-                Selecciona los platos por persona
+            <div className="h-full flex flex-col bg-white/20 text-dark w-[40%] p-6 rounded-lg">
+              <h4 className="font-semibold mb-4">
+                Por favor, seleccione al menos un plato del menú para persona
+                No. {asistenteActual + 1}
               </h4>
 
               {/* Asistente Actual */}
-              <div className="text-dark rounded-lg mb-4 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="rounded-lg mb-4 flex-1 flex flex-col min-h-0 overflow-hidden">
                 <div className="flex flex-col overflow-hidden">
-                  <div className="font-medium text-lg my-4">
-                    <span className="block">{asistenteNombre}</span>
-                  </div>
-
                   {/* Lista de platos con scroll */}
                   <div className="flex-1 min-h-0">
                     <div className="h-full overflow-y-auto max-h-[60vh]">
@@ -422,6 +568,7 @@ export default function PlatosSeleccion({
                                   </div>
 
                                   <IncremenAndDecrementComponent
+                                    colorItems="text-dark"
                                     item={plato.cantidad}
                                     increaseQuantity={() =>
                                       handleIncrementarCantidad(plato.id)
@@ -436,9 +583,7 @@ export default function PlatosSeleccion({
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-dark/60 italic">
-                          Sin platos seleccionados
-                        </p>
+                        <p className="text-xs text-dark/60 italic"></p>
                       )}
                     </div>
                   </div>
@@ -481,7 +626,7 @@ export default function PlatosSeleccion({
                   {asistenteActual !== 0 && (
                     <Button
                       onClick={irAlAnterior}
-                      title="Anterior"
+                      title="Persona anterior"
                       type="button-dark"
                       customClass={`flex-1 py-1 px-3 ${
                         asistenteActual === 0
@@ -489,14 +634,12 @@ export default function PlatosSeleccion({
                           : ""
                       }`}
                       disabled={asistenteActual === 0}
-                      gap-4
                     />
                   )}
-
-                  {asistenteActual === asistentes.length - 1 ? (
+                  {asistenteActual === asistentesLista.length - 1 ? (
                     <Button
                       onClick={handleConfirmar}
-                      title={guardando ? "Guardando..." : "Confirmar pedido"}
+                      title={guardando ? "Guardando..." : "Pagar y reservar"}
                       type="button-dark"
                       customClass="flex-1 py-1 px-3"
                       disabled={guardando}
@@ -508,11 +651,11 @@ export default function PlatosSeleccion({
                       width=""
                       type="button-dark"
                       customClass={`flex-1 py-1 px-3 ${
-                        asistenteActual === asistentes.length - 1
+                        asistenteActual === asistentesLista.length - 1
                           ? "opacity-50 cursor-not-allowed"
                           : ""
                       }`}
-                      disabled={asistenteActual === asistentes.length - 1}
+                      disabled={asistenteActual === asistentesLista.length - 1}
                     />
                   )}
                 </div>

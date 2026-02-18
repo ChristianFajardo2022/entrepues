@@ -324,6 +324,17 @@ export default function MenuModal() {
               <Sections key={index} content={section} invert={section.invert} />
             ))}
           </div>
+
+          <div className="h-96 w-full flex justify-center items-center">
+            <Button
+              type="enlace"
+              href={"/menu"}
+              onClick={CompletarReserva}
+              variant="button-dark"
+              size="lg"
+              title={"Ver la carta"}
+            />
+          </div>
         </div>
       </ModalLayout>
     </>

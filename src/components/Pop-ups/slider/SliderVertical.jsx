@@ -3,7 +3,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "./styleVertical.css";
- 
 
 import useReservaStore from "../../../store/reservaStore";
 import PasoFecha from "../../reserva/datepicker/PasoFecha";
@@ -24,7 +23,7 @@ export default function SliderVertical() {
     setCompletedSteps,
     reservaData,
     updateReservaData,
-    showResumen,
+    showMenuSelected,
     editarReserva,
     enviarDatos,
     showThankYouPage,
@@ -69,6 +68,10 @@ export default function SliderVertical() {
 
   const handleSlideChange = (swiper) => {
     setCurrentStep(swiper.activeIndex);
+  };
+
+  const handleElegirMenu = async () => {
+    showMenuSelected(true);
   };
 
   const handleConfirmarReserva = async () => {
@@ -179,56 +182,9 @@ export default function SliderVertical() {
               />
             </div>
           </div>
-          <ConfirmarPasoBoton confirmarPaso={confirmarPaso} />
+          <ConfirmarPasoBoton confirmarPaso={handleElegirMenu} texto="Seleccionar platos"/>
         </div>
       </SwiperSlide>
-
-      {/* PASO 3: Contacto */}
-      <SwiperSlide className="slide-content">
-        <div className="w-full h-full flex flex-col items-center justify-center py-8">
-          <div className="w-full max-w-sm flex-1 flex flex-col">
-            <div className="flex-1 flex items-center justify-center">
-              <PasoContacto
-                name={name}
-                email={email}
-                whatsapp={whatsapp}
-                setName={setName}
-                setEmail={setEmail}
-                setWhatsapp={setWhatsapp}
-                onValidationChange={setIsContactDataValid}
-                selectedDate={selectedDate}
-                hour={hour}
-                minute={minute}
-                adults={adults}
-                children={children}
-                mascotas={mascotas}
-              />
-            </div>
-          </div>
-          <ConfirmarPasoBoton
-            confirmarPaso={handleConfirmarReserva}
-            texto={"Confirmar reserva"}
-            isDisabled={!isContactDataValid}
-          />
-        </div>
-      </SwiperSlide>
-
-      {/* RESUMEN */}
-      {showResumen && (
-        <SwiperSlide className="slide-content">
-          <div className="w-full h-full flex flex-col items-center justify-center px-6 py-8">
-            <div className="w-full max-w-sm flex-1 flex flex-col overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-4 text-secondary">
-                Resumen de tu reserva
-              </h3>
-              <ResumenReserva
-                onEditar={handleEditarReserva}
-                onConfirmar={handleConfirmarReserva}
-              />
-            </div>
-          </div>
-        </SwiperSlide>
-      )}
     </Swiper>
   );
 }

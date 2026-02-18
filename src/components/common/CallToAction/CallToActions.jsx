@@ -22,9 +22,7 @@ export const CallToActions = ({ site = "home" }) => {
   const isSectionVisible = useObserverVisibility(".hide-logo-section");
   const { loadingComplete } = useLoaderContext();
 
-  const handleOpenbooking = () => {
-    openBookingWithOrigin("Volver al inicio");
-  };
+ 
   const handleOpenMenu = () => {
     openMenuWithContext("Volver al inicio");
   };
@@ -51,20 +49,29 @@ export const CallToActions = ({ site = "home" }) => {
             motionProps={{
               initial: { y: 100 },
               animate: { y: 0 },
-              transition: { delay: getAnimationDelay(1.2), ease: "easeInOut", duration: 1 },
+              transition: {
+                delay: getAnimationDelay(1.2),
+                ease: "easeInOut",
+                duration: 1,
+              },
             }}
           />
           <Button
             width="full"
-            customClass="order-1  md:order-2"
-            type="button-primary"
+            customClass="order-1  md:order-2 !bg-secondary !text-brown !border !border-brown"
+            type="enlace"
+            href="/reservar"
             title="Reservar"
             fontSize="2xl"
-            onClick={handleOpenbooking}
+          
             motionProps={{
               initial: { y: 100 },
               animate: { y: 0 },
-              transition: { delay: getAnimationDelay(0.8), ease: "easeInOut", duration: 1 },
+              transition: {
+                delay: getAnimationDelay(0.8),
+                ease: "easeInOut",
+                duration: 1,
+              },
             }}
           />
           {site == "home" ? (
@@ -79,7 +86,11 @@ export const CallToActions = ({ site = "home" }) => {
                 motionProps={{
                   initial: { y: 100 },
                   animate: { y: 0 },
-                  transition: { delay: getAnimationDelay(1.3), ease: "easeInOut", duration: 1 },
+                  transition: {
+                    delay: getAnimationDelay(1.3),
+                    ease: "easeInOut",
+                    duration: 1,
+                  },
                 }}
               />
             </>
@@ -94,7 +105,11 @@ export const CallToActions = ({ site = "home" }) => {
               motionProps={{
                 initial: { y: 100 },
                 animate: { y: 0 },
-                transition: { delay: getAnimationDelay(1), ease: "easeInOut", duration: 1 },
+                transition: {
+                  delay: getAnimationDelay(1),
+                  ease: "easeInOut",
+                  duration: 1,
+                },
               }}
             />
           )}
@@ -103,7 +118,11 @@ export const CallToActions = ({ site = "home" }) => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: getAnimationDelay(1.5), ease: "easeInOut", duration: 1 }}
+          transition={{
+            delay: getAnimationDelay(1.5),
+            ease: "easeInOut",
+            duration: 1,
+          }}
           className="flex justify-center items-center gap-12 max-md:mt-4"
         >
           <div

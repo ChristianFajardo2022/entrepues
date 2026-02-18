@@ -39,7 +39,7 @@ export const obtenerSiguienteNumeroReserva = async () => {
       const contadorDoc = await transaction.get(contadorRef);
 
       let ultimoNumero = 0;
-      
+
       if (contadorDoc.exists()) {
         ultimoNumero = contadorDoc.data().ultimoNumero || 0;
       }
@@ -92,7 +92,7 @@ export const guardarReservaEnFirestore = async (payload) => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-       
+
       return { ok: true, id: docRef.id };
     } catch (error) {
       lastError = error;
@@ -111,7 +111,10 @@ export const guardarReservaEnFirestore = async (payload) => {
   }
 
   // 4. Retornar error final
-  console.error("Error guardando en Firestore después de reintentos:", lastError);
+  console.error(
+    "Error guardando en Firestore después de reintentos:",
+    lastError
+  );
   return {
     ok: false,
     error: lastError?.message || "Error desconocido al guardar reserva",

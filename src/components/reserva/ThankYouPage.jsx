@@ -9,8 +9,8 @@ import useReservaStore from "../../store/reservaStore";
  * Página de agradecimiento después de confirmar la reserva
  */
 export default function ThankYouPage({ onClose, reservaResult }) {
-  const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(true);
-  /* const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(false); */
+/*   const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(true); */
+  const [mostrarSeleccionPlatos, setMostrarSeleccionPlatos] = useState(false);
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [totalGuardado, setTotalGuardado] = useState(0);
 

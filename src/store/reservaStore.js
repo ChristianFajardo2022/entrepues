@@ -24,6 +24,7 @@ export const useReservaStore = create(
       currentStep: 0,
       completedSteps: [false, false, false, false],
       showResumen: false, // Flag para mostrar el resumen (todos los pasos completados)
+      showMenu: false, // Flag para mostrar el menú
       showThankYou: false, // Flag para mostrar la página de agradecimiento
 
       // ===== DATOS DE LA RESERVA =====
@@ -42,7 +43,7 @@ export const useReservaStore = create(
 
       // ===== DATOS DE SELECCIÓN DE PLATOS =====
       platosSeleccionados: {}, // Estructura: { asistenteIndex: [platos] }
-      
+
       updatePlatosSeleccionados: (datos) =>
         set({
           platosSeleccionados: datos,
@@ -69,6 +70,92 @@ export const useReservaStore = create(
         set({
           reservaResult: data,
         }),
+
+      // ===== DATOS TEMPORALES PARA CHECKOUT =====
+
+      /**
+       * Prepara y guarda los datos temporales para el checkout
+       * Incluye validación y persistencia en localStorage
+       */
+      prepararDatosCheckout: (platosSeleccionados) => {
+        const { reservaData } = get();
+
+        // Crear estructura temporal para checkout
+        const checkoutData = {
+          id: `temp-${Date.now()}`,
+          fechaCreacion: new Date().toISOString(),
+          estado: "temporal",
+          reservaData: reservaData,
+          platosSeleccionados: platosSeleccionados,
+          uiState: {
+            showMenu: true,
+          },
+          validado: true,
+        };
+
+        try {
+          // Guardar en localStorage como backup
+          localStorage.setItem(
+            "checkout:reserva:temp",
+            JSON.stringify(checkoutData)
+          );
+
+          // Actualizar estado de Zustand
+          set((state) => ({
+            platosSeleccionados: {
+              ...state.platosSeleccionados,
+              checkoutData: checkoutData,
+            },
+          }));
+
+          console.log("✅ Datos preparados para checkout:", checkoutData);
+          return { ok: true, data: checkoutData };
+        } catch (error) {
+          console.error("❌ Error preparando datos para checkout:", error);
+          return { ok: false, error: error.message };
+        }
+      },
+
+      /**
+       * Obtiene los datos temporales del checkout desde Zustand o localStorage
+       */
+      obtenerDatosCheckout: () => {
+        try {
+          // Primero intentar desde Zustand
+          const state = get();
+          if (state.platosSeleccionados?.checkoutData) {
+            return state.platosSeleccionados.checkoutData;
+          }
+
+          // Si no está en Zustand, intentar desde localStorage
+          const stored = localStorage.getItem("checkout:reserva:temp");
+          if (stored) {
+            return JSON.parse(stored);
+          }
+
+          return null;
+        } catch (error) {
+          console.error("❌ Error obteniendo datos de checkout:", error);
+          return null;
+        }
+      },
+
+      /**
+       * Limpia los datos temporales del checkout
+       */
+      limpiarDatosCheckout: () => {
+        try {
+          localStorage.removeItem("checkout:reserva:temp");
+          set((state) => ({
+            platosSeleccionados: {
+              ...state.platosSeleccionados,
+              checkoutData: null,
+            },
+          }));
+        } catch (error) {
+          console.error("❌ Error limpiando datos de checkout:", error);
+        }
+      },
 
       // ===== ESTADO DE ENVÍO =====
 
@@ -130,6 +217,36 @@ export const useReservaStore = create(
           showThankYou: true,
           showResumen: false,
         });
+      },
+      // Acción para mostrar Thank You Page después de enviar
+      showMenuSelected: (state) => {
+        const nextShowMenu = state !== undefined ? state : true;
+        set({
+          showMenu: nextShowMenu,
+        });
+
+        try {
+          const raw = localStorage.getItem("checkout:reserva:temp");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const actualizado = {
+              ...parsed,
+              uiState: {
+                ...(parsed?.uiState || {}),
+                showMenu: nextShowMenu,
+              },
+            };
+            localStorage.setItem(
+              "checkout:reserva:temp",
+              JSON.stringify(actualizado)
+            );
+          }
+        } catch (error) {
+          console.error(
+            "❌ Error sincronizando showMenu en checkout temp:",
+            error
+          );
+        }
       },
 
       // Acción para cerrar Thank You y resetear todo EXCEPTO reservaResult
@@ -230,7 +347,7 @@ export const useReservaStore = create(
        * @param {Object} extras - Datos adicionales opcionales
        * @returns {Promise<{ok: boolean, id?: string, error?: string}>}
        */
-      enviarDatos: async (extras = {}) => {
+      enviarDatos: async (productos = {}) => {
         set({ isSending: true });
         const { reservaData } = get();
 

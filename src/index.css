@@ -29,21 +29,20 @@
 }
 
 html {
-  @apply xl:text-[0.8333339vw] max-sm:text-[3.5vw] sm:text-[1.5vw] lg:text-[1vw] bg-[#0b0b0b];
+  @apply xl:text-[0.8333339vw] max-sm:text-[3.5vw] sm:text-[1.5vw] lg:text-[1vw];
 
   scroll-behavior: smooth;
   /* @apply overflow-x-hidden xl:text-[16px] max-sm:text-[4vw] sm:text-[1.5vw] lg:text-[1vw] scroll-smooth bg-black; */
 }
 
 body {
-  @apply overflow-x-hidden bg-[#0b0b0b] text-brown;
+  @apply overflow-x-hidden bg-secondary text-brown;
 
   scroll-behavior: smooth;
 
   font-family: "Helvetica-Regular", sans-serif;
   /* Scroll para Webkit (Chrome, Safari, Edge) */
   scrollbar-width: thin;
-  scrollbar-color: #0a0a0a;
 }
 
 #root {
@@ -52,17 +51,15 @@ body {
 
 /* Webkit scrollbar (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  @apply lg:w-1 lg:h-1 w-2 h-px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #ffffff10;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 1px;
+  @apply lg:bg-brown bg-brown/30 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -106,7 +103,7 @@ button {
 }
 p,
 span {
-  @apply text-xl;
+  @apply text-lg;
 }
 h4 {
   @apply text-xl;
